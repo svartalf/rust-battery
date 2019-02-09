@@ -1,0 +1,15 @@
+[package]
+name = "battery"
+version = "0.0.1"
+authors = ["svartalf <self@svartalf.info>"]
+edition = "2018"
+description = "Cross-platform information about batteries"
+repository = "https://github.com/svartalf/rust-battery"
+readme = "README.md"
+categories = ["os"]
+license = "Apache-2.0 OR MIT"
+
+[badges]
+maintenance = { status = "experimental" }
+
+[dependencies]
