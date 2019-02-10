@@ -1,6 +1,5 @@
 extern crate battery;
 
-
 fn main() {
     for (idx, bat) in battery::get().enumerate() {
         println!("Device:\t\t\t{}", idx);
@@ -33,15 +32,3 @@ fn main() {
         println!("  technology:\t\t{}", bat.technology());
     }
 }
-
-//    percentage:          52%
-//    temperature:         30.4 degrees C
-//    capacity:            67.1189%
-//    technology:          lithium-ion
-//    icon-name:          'battery-good-symbolic'
-//  History (rate):
-//    1549815517  10.146  discharging
-//    1549815515  8.162   discharging
-//    1549815513  8.892   discharging
-//    1549815511  6.118   discharging
-//    1549815509  8.284   discharging

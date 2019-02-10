@@ -1,20 +1,17 @@
-#[cfg(target_os = "linux")]
-mod linux;
+cfg_if! {
+    if #[cfg(target_os = "linux")] {
+        mod linux;
 
-/// Creates an iterator which yields information about available batteries.
-///
-/// ```edition2018
-/// # use std::error::Error;
-/// # use battery;
-/// #
-/// # fn main() -> Result<(), Box<Error>> {
-/// for (idx, bat) in battery::get().enumerate() {
-///     let bat = bat?;
-///     println!("BAT{}: {}, {:.2}%", idx, bat.state(), bat.current() / bat.full() * 100.0);
-/// }
-/// # Ok(())
-/// # }
-#[cfg(target_os = "linux")]
-pub fn get() -> linux::SysFs {
-    linux::SysFs::new()
+        pub type BatteryIterator = linux::SysFs;
+        pub type BatteryDevice = linux::SysFsDevice;
+    } else {
+        compile_error!("Support for this target OS is not implemented yet!\n \
+            You may want to create an issue: https://github.com/svartalf/rust-battery/issues/new");
+    }
+}
+
+use crate::Battery;
+
+pub fn get() -> impl Iterator<Item=Battery> {
+    BatteryIterator::new()
 }

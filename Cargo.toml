@@ -1,6 +1,6 @@
 [package]
 name = "battery"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "Cross-platform information about batteries"
@@ -13,4 +13,5 @@ license = "Apache-2.0 OR MIT"
 maintenance = { status = "experimental" }
 
 [dependencies]
+cfg-if = "0.1"
 lazy-init = "0.3"

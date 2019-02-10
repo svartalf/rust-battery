@@ -8,6 +8,8 @@ use crate::{Battery};
 mod device;
 mod sysfs;
 
+pub use self::device::SysFsDevice;
+
 static SYSFS_ROOT: &'static str = "/sys/class/power_supply";
 
 #[must_use = "iterators are lazy and do nothing unless consumed"]
@@ -49,14 +51,14 @@ impl SysFs {
 }
 
 impl iter::Iterator for SysFs {
-    type Item = Battery<device::SysFsDevice>;
+    type Item = Battery;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.adapters.pop() {
             None => None,
             Some(path) => {
                 let device = device::SysFsDevice::new(path);
-                Some(Battery::new(device))
+                Some(Battery::from(device))
             }
         }
     }

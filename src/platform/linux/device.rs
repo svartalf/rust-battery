@@ -5,7 +5,8 @@ use std::time::Duration;
 
 use lazy_init::Lazy;
 
-use crate::{Device, State, Technology};
+use crate::{State, Technology};
+use crate::types::Device;
 use super::sysfs;
 
 const DESIGN_VOLTAGE_PROBES: [&str; 4] = [

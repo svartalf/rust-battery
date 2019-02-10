@@ -1,91 +1,86 @@
 use std::fmt;
 use std::time::Duration;
 
-use crate::{Device, State, Technology};
+use crate::{State, Technology};
+use crate::types::Device;
+use crate::platform::BatteryDevice;
 
 /// Battery instant information representation.
 ///
 /// Consequent calls of the same method will return the same value.
-pub struct Battery<T: Device> {
-    device: T,
-}
+pub struct Battery(BatteryDevice);
 
-impl<T> Battery<T> where T: Device {
-    pub(crate) fn new(device: T) -> Battery<T> {
-        Battery {
-            device,
-        }
-    }
+impl Battery {
 
     /// Gets battery current state.
     ///
     /// See [State](enum.State.html) enum for possible values.
     pub fn state(&self) -> State {
-        self.device.state()
+        self.0.state()
     }
 
     /// Gets battery technology.
     ///
     /// See [Technology](enum.Technology.html) enum for possible values.
     pub fn technology(&self) -> Technology {
-        self.device.technology()
+        self.0.technology()
     }
 
     /// Gets battery vendor.
     ///
     /// Might not exist.
     pub fn vendor(&self) -> Option<&str> {
-        self.device.vendor()
+        self.0.vendor()
     }
 
     /// Gets battery model.
     ///
     /// Might not exist.
     pub fn model(&self) -> Option<&str> {
-        self.device.model()
+        self.0.model()
     }
 
     /// Gets battery serial number.
     ///
     /// Might not exist.
     pub fn serial_number(&self) -> Option<&str> {
-        self.device.serial_number()
+        self.0.serial_number()
     }
 
     /// Gets battery capacity in `0.0..100.0` percents range.
     pub fn capacity(&self) -> f64 {
-        self.device.capacity()
+        self.0.capacity()
     }
 
     /// Gets battery temperature in Celsius degrees.
     pub fn temperature(&self) -> f64 {
-        self.device.temperature()
+        self.0.temperature()
     }
 
     pub fn percentage(&self) -> f64 {
-        self.device.percentage()
+        self.0.percentage()
     }
 
     /// `Wh`
     pub fn energy(&self) -> f64 {
-        self.device.energy()
+        self.0.energy()
     }
 
     pub fn energy_full(&self) -> f64 {
-        self.device.energy_full()
+        self.0.energy_full()
     }
 
     pub fn energy_full_design(&self) -> f64 {
-        self.device.energy_full_design()
+        self.0.energy_full_design()
     }
 
     pub fn energy_rate(&self) -> f64 {
-        self.device.energy_rate()
+        self.0.energy_rate()
     }
 
     /// Gets a battery voltage (in `V`).
     pub fn voltage(&self) -> f64 {
-        self.device.voltage()
+        self.0.voltage()
     }
 
     /// Gets a remaining time till full battery.
@@ -95,7 +90,7 @@ impl<T> Battery<T> where T: Device {
     ///
     /// If battery is not charging at the moment, this method will return `None`.
     pub fn time_to_full(&self) -> Option<Duration> {
-        self.device.time_to_full()
+        self.0.time_to_full()
     }
 
     /// Gets a remaining time till empty battery.
@@ -105,12 +100,12 @@ impl<T> Battery<T> where T: Device {
     ///
     /// If battery is not discharging at the moment, this method will return `None`.
     pub fn time_to_empty(&self) -> Option<Duration> {
-        self.device.time_to_empty()
+        self.0.time_to_empty()
     }
 
 }
 
-impl<T> fmt::Debug for Battery<T> where T: Device {
+impl fmt::Debug for Battery {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Battery")
             // static info
@@ -137,5 +132,11 @@ impl<T> fmt::Debug for Battery<T> where T: Device {
             .field("time_to_empty", &self.time_to_empty())
 
             .finish()
+    }
+}
+
+impl From<BatteryDevice> for Battery {
+    fn from(inner: BatteryDevice) -> Self {
+        Battery(inner)
     }
 }
