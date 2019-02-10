@@ -1,8 +1,3 @@
-use std::io;
-use std::iter;
-
-use crate::Battery;
-
 #[cfg(target_os = "linux")]
 mod linux;
 
@@ -19,7 +14,7 @@ mod linux;
 /// }
 /// # Ok(())
 /// # }
-pub fn get() -> impl iter::Iterator<Item=io::Result<Battery>> {
-    #[cfg(target_os = "linux")]
-    self::linux::SysFs::new()
+#[cfg(target_os = "linux")]
+pub fn get() -> linux::SysFs {
+    linux::SysFs::new()
 }

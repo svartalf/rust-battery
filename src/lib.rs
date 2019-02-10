@@ -7,8 +7,8 @@
 //!
 //! * Linux 2.6.39+
 
-mod info;
+mod types;
 mod platform;
 
-pub use info::{Battery, State};
+pub use types::{Battery, State, Technology, Device};
 pub use platform::get;

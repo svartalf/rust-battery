@@ -1,37 +1,47 @@
 extern crate battery;
 
-use battery::State;
 
-use std::error::Error;
-
-fn main() -> Result<(), Box<Error>> {
-    for (idx, battery) in battery::get().enumerate() {
-        let battery = battery?;
-
-        print!("BAT{}: {}, {:.2}%", idx, battery.state(), battery.current() / battery.full() * 100.0);
-
-        match battery.state() {
-            State::Discharging => {
-                if *battery.charge_rate() == 0.0 {
-                    print!(", discharging at zero rate - will never fully discharge");
-                } else {
-                    // TODO: Fix time representation
-                    print!(", {:.2} hour remaining", battery.current() / battery.charge_rate());
-                }
+fn main() {
+    for (idx, bat) in battery::get().enumerate() {
+        println!("Device:\t\t\t{}", idx);
+        println!("vendor:\t\t\t{}", bat.vendor().unwrap_or("N/A"));
+        println!("model:\t\t\t{}", bat.model().unwrap_or("N/A"));
+        println!("battery");
+        println!("  state:\t\t{}", bat.state());
+        println!("  energy:\t\t{:.2} Wh", bat.energy());
+        println!("  energy-full:\t\t{:.2} Wh", bat.energy_full());
+        println!("  energy-full-design:\t{:.2} Wh", bat.energy_full_design());
+        println!("  energy-rate:\t\t{:.2} Wh", bat.energy_rate());
+        println!("  voltage:\t\t{:.2} V", bat.voltage());
+        match bat.state() {
+            battery::State::Discharging => {
+                println!("  time-to-empty\t\t{} seconds",
+                         bat.time_to_empty()
+                             .and_then(|d| Some(d.as_secs()))
+                             .unwrap_or(0));
             },
-            State::Charging => {
-                if *battery.charge_rate() == 0.0 {
-                    print!(", charging at zero rate - will never fully charge");
-                } else {
-                    // TODO: Fix time representation
-                    print!(", {:.2} hour until charged", (battery.full() - battery.current()) / battery.charge_rate());
-                }
-            }
-            _ => {}
+            battery::State::Charging => {
+                println!("  time-to-full\t\t{} seconds",
+                         bat.time_to_full()
+                             .and_then(|d| Some(d.as_secs()))
+                             .unwrap_or(0));
+            },
+            _ => {},
         }
-
-        println!("  [Voltage: {:.2}V (design: {:.2}V)]", battery.voltage(), battery.design_voltage());
+        println!("  percentage:\t\t{:.2}%", bat.percentage());
+        println!("  temperature:\t\t{:.2} °C", bat.temperature());
+        println!("  technology:\t\t{}", bat.technology());
     }
-
-    Ok(())
 }
+
+//    percentage:          52%
+//    temperature:         30.4 degrees C
+//    capacity:            67.1189%
+//    technology:          lithium-ion
+//    icon-name:          'battery-good-symbolic'
+//  History (rate):
+//    1549815517  10.146  discharging
+//    1549815515  8.162   discharging
+//    1549815513  8.892   discharging
+//    1549815511  6.118   discharging
+//    1549815509  8.284   discharging
