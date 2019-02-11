@@ -4,6 +4,8 @@ use crate::{State, Technology};
 
 
 pub trait Device {
+    // TODO: Cycle count
+
     fn capacity(&self) -> f64;
 
     fn energy(&self) -> f64;

@@ -6,8 +6,12 @@
 //! ## Supported platforms
 //!
 //! * Linux 2.6.39+
+//! * MacOS (10.10+ probably, needs to be confirmed)
 
 #[macro_use] extern crate cfg_if;
+
+#[cfg(target_os = "macos")]
+#[macro_use] extern crate serde;
 
 mod types;
 mod platform;

@@ -22,27 +22,29 @@ impl Battery {
     /// Gets battery technology.
     ///
     /// See [Technology](enum.Technology.html) enum for possible values.
+    ///
+    /// ## Compatibility
+    ///
+    /// * For MacOS this method always returns `Technology::Unknown`
     pub fn technology(&self) -> Technology {
         self.0.technology()
     }
 
     /// Gets battery vendor.
     ///
-    /// Might not exist.
+    /// # Compatibility
+    ///
+    /// * For MacOS this method always returns `None`
     pub fn vendor(&self) -> Option<&str> {
         self.0.vendor()
     }
 
     /// Gets battery model.
-    ///
-    /// Might not exist.
     pub fn model(&self) -> Option<&str> {
         self.0.model()
     }
 
     /// Gets battery serial number.
-    ///
-    /// Might not exist.
     pub fn serial_number(&self) -> Option<&str> {
         self.0.serial_number()
     }
@@ -57,23 +59,27 @@ impl Battery {
         self.0.temperature()
     }
 
+    /// The amount of energy left in the battery expressed as a percentage between `0.0` and `100.0`.
     pub fn percentage(&self) -> f64 {
         self.0.percentage()
     }
 
-    /// `Wh`
+    /// Amount of energy (measured in `Wh`) currently available in the battery.
     pub fn energy(&self) -> f64 {
         self.0.energy()
     }
 
+    /// Amount of energy (measured in `Wh`) in the battery when it's considered full.
     pub fn energy_full(&self) -> f64 {
         self.0.energy_full()
     }
 
+    /// Amount of energy (measured in `Wh`) the battery is designed to hold when it's considered full.
     pub fn energy_full_design(&self) -> f64 {
         self.0.energy_full_design()
     }
 
+    /// Amount of energy being drained from the battery, measured in `W`.
     pub fn energy_rate(&self) -> f64 {
         self.0.energy_rate()
     }
