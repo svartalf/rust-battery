@@ -10,9 +10,6 @@
 
 #[macro_use] extern crate cfg_if;
 
-#[cfg(target_os = "macos")]
-#[macro_use] extern crate serde;
-
 mod types;
 mod platform;
 

@@ -5,10 +5,10 @@ cfg_if! {
         pub type BatteryIterator = linux::SysFs;
         pub type BatteryDevice = linux::SysFsDevice;
     } else if #[cfg(target_os = "macos")] {
-        mod darwin;
+        mod macos;
 
-        pub type BatteryIterator = darwin::IoReg;
-        pub type BatteryDevice = darwin::IoRegDevice;
+        pub type BatteryIterator = macos::IoKitDiscovery;
+        pub type BatteryDevice = macos::IoKitDevice;
     } else {
         compile_error!("Support for this target OS is not implemented yet!\n \
             You may want to create an issue: https://github.com/svartalf/rust-battery/issues/new");

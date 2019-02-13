@@ -25,7 +25,7 @@ impl Battery {
     ///
     /// ## Compatibility
     ///
-    /// * For MacOS this method always returns `Technology::Unknown`
+    /// * For MacOS this method always returns `None`. This behavior might change later.
     pub fn technology(&self) -> Technology {
         self.0.technology()
     }
@@ -34,7 +34,7 @@ impl Battery {
     ///
     /// # Compatibility
     ///
-    /// * For MacOS this method always returns `None`
+    /// * For MacOS this method always returns `None`. This behavior might change later.
     pub fn vendor(&self) -> Option<&str> {
         self.0.vendor()
     }
