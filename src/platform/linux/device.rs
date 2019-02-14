@@ -35,19 +35,44 @@ pub struct SysFsDevice {
     manufacturer: Lazy<Option<String>>,
     model_name: Lazy<Option<String>>,
     serial_number: Lazy<Option<String>>,
-
 }
 
 impl SysFsDevice {
     pub fn new(root: PathBuf) -> SysFsDevice {
-        SysFsDevice {
+        let device = SysFsDevice {
             root,
             ..Default::default()
-        }
+        };
+
+        device.preload();
+
+        device
     }
 }
 
 impl SysFsDevice {
+    // With current design, `SysFsDevice` is not an instant representation of the battery stats
+    // because of `Lazy` fields. End user might fetch needed data with a significant time difference
+    // which will lead to an inconsistent results.
+    // All results should be loaded at the same time; as for now, making a quick hack
+    // and preloading all the stuff in once.
+    // It seems that even with ignored results (`let _ = self...()`), rust still calls all required methods.
+    fn preload(&self) {
+        let _ = self.design_voltage();
+        let _ = self.charge_full();
+        let _ = self.energy();
+        let _ = self.energy_full();
+        let _ = self.energy_full_design();
+        let _ = self.energy_rate();
+        let _ = self.voltage();
+        let _ = self.percentage();
+        let _ = self.temperature();
+        let _ = self.state();
+        let _ = self.technology();
+        let _ = self.vendor();
+        let _ = self.model();
+        let _ = self.serial_number();
+    }
 
     fn design_voltage(&self) -> f64 {
         *self.design_voltage.get_or_create(|| {

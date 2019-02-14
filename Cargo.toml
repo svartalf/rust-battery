@@ -1,6 +1,6 @@
 [package]
 name = "battery"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "Cross-platform information about batteries"
@@ -12,7 +12,8 @@ license = "Apache-2.0 OR MIT"
 build = "build.rs"
 
 [badges]
-maintenance = { status = "experimental" }
+travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 cfg-if = "0.1"

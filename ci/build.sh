@@ -10,3 +10,7 @@ fi
 
 ${CARGO_BIN} build --target="${TARGET}"
 ${CARGO_BIN} test --target="${TARGET}"
+
+if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
+    cargo audit
+fi
