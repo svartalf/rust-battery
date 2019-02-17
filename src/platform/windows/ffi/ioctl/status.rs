@@ -29,9 +29,9 @@ const BATTERY_POWER_ON_LINE: ntdef::ULONG = 0x00000001;
 
 STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_STATUS {
     PowerState: ntdef::ULONG,
-    Capacity: ntdef::ULONG,
-    Voltage: ntdef::ULONG,
-    Rate: ntdef::LONG, // milliwatts, might be negative
+    Capacity: ntdef::ULONG, // mWh or BATTERY_UNKNOWN_CAPACITY
+    Voltage: ntdef::ULONG, // mV or BATTERY_UNKNOWN_VOLTAGE
+    Rate: ntdef::LONG, // mW, might be negative
 }}
 
 impl Default for BATTERY_STATUS {
@@ -96,27 +96,32 @@ impl BatteryStatus {
         }
     }
 
-    pub fn voltage(&self) -> Option<f64> {
+    pub fn voltage(&self) -> Option<u32> {
         if self.0.Voltage == BATTERY_UNKNOWN_VOLTAGE {
             None
         } else {
-            Some(f64::from(self.0.Voltage) / 1_000.0)
+            Some(self.0.Voltage)
         }
     }
 
-    pub fn capacity(&self) -> Option<f64> {
+    pub fn capacity(&self) -> Option<u32> {
         if self.0.Capacity == BATTERY_UNKNOWN_CAPACITY {
             None
         } else {
-            Some(f64::from(self.0.Capacity) / 1_000.0)
+            Some(self.0.Capacity)
         }
     }
 
-    pub fn rate(&self) -> Option<f64> {
+    pub fn rate(&self) -> Option<u32> {
         if self.0.Rate == BATTERY_UNKNOWN_RATE {
             None
         } else {
-            Some(f64::from(self.0.Rate) / 1_000.0)
+            let value = self.0.Rate;
+            if value.is_negative() {
+                Some((-value) as u32)
+            } else {
+                Some(value as u32)
+            }
         }
     }
 }

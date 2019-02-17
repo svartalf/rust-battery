@@ -94,17 +94,17 @@ impl PowerSource {
         }
     }
 
-    pub fn get_f64(&self, key: &[u8]) -> Option<f64> {
+    pub fn get_u32(&self, key: &[u8]) -> Option<u32> {
         if let Some(value_ptr) = self.get_dict_value_ptr(key) {
             unsafe {
                 debug_assert!(core::CFGetTypeID(value_ptr) == core::CFNumberGetTypeID());
             }
 
-            let mut value = 0.0;
+            let mut value = 0u32;
             let res = unsafe {
                 core::CFNumberGetValue(
                     value_ptr as core::CFNumberRef,
-                    core::kCFNumberFloat64Type,
+                    core::kCFNumberIntType,
                     &mut value as *mut _ as *mut libc::c_void
                 )
             };

@@ -31,10 +31,6 @@ impl Battery {
     }
 
     /// Gets battery vendor.
-    ///
-    /// # Compatibility
-    ///
-    /// * For MacOS this method always returns `None`. This behavior might change later.
     pub fn vendor(&self) -> Option<&str> {
         self.0.vendor()
     }
@@ -50,42 +46,47 @@ impl Battery {
     }
 
     /// Gets battery capacity in `0.0..100.0` percents range.
-    pub fn capacity(&self) -> f64 {
+    pub fn capacity(&self) -> f32 {
         self.0.capacity()
     }
 
     /// Gets battery temperature in Celsius degrees.
-    pub fn temperature(&self) -> f64 {
+    ///
+    /// ## Compatibility
+    ///
+    /// Not all device drivers are providing this value, therefore callers should not
+    /// expect to have some all the time.
+    pub fn temperature(&self) -> Option<f32> {
         self.0.temperature()
     }
 
     /// The amount of energy left in the battery expressed as a percentage between `0.0` and `100.0`.
-    pub fn percentage(&self) -> f64 {
+    pub fn percentage(&self) -> f32 {
         self.0.percentage()
     }
 
-    /// Amount of energy (measured in `Wh`) currently available in the battery.
-    pub fn energy(&self) -> f64 {
+    /// Amount of energy (measured in `mWh`) currently available in the battery.
+    pub fn energy(&self) -> u32 {
         self.0.energy()
     }
 
-    /// Amount of energy (measured in `Wh`) in the battery when it's considered full.
-    pub fn energy_full(&self) -> f64 {
+    /// Amount of energy (measured in `mWh`) in the battery when it's considered full.
+    pub fn energy_full(&self) -> u32 {
         self.0.energy_full()
     }
 
-    /// Amount of energy (measured in `Wh`) the battery is designed to hold when it's considered full.
-    pub fn energy_full_design(&self) -> f64 {
+    /// Amount of energy (measured in `mWh`) the battery is designed to hold when it's considered full.
+    pub fn energy_full_design(&self) -> u32 {
         self.0.energy_full_design()
     }
 
-    /// Amount of energy being drained from the battery, measured in `W`.
-    pub fn energy_rate(&self) -> f64 {
+    /// Amount of energy being drained from the battery, measured in `mW`.
+    pub fn energy_rate(&self) -> u32 {
         self.0.energy_rate()
     }
 
-    /// Gets a battery voltage (in `V`).
-    pub fn voltage(&self) -> f64 {
+    /// Gets a battery voltage (in `mV`).
+    pub fn voltage(&self) -> u32 {
         self.0.voltage()
     }
 

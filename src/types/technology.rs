@@ -1,7 +1,7 @@
 use std::str;
 use std::fmt;
 
-/// Battery type
+/// Possible battery technologies.
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum Technology {
     Unknown,

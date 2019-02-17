@@ -21,13 +21,13 @@ pub struct IoKitDevice{
     external_connected: bool,
     is_charging: bool,
 
-    voltage: f64,
-    amperage: f64,
-    temperature: isize,
+    voltage: u32, // mV
+    amperage: u32, // mA
+    temperature: Option<f32>,
 
-    design_capacity: f64,
-    max_capacity: f64,
-    current_capacity: f64,
+    design_capacity: u32, // mAh
+    max_capacity: u32, // mAh
+    current_capacity: u32,  // mAh
 
     manufacturer: Option<String>,
     model: Option<String>,
@@ -48,19 +48,18 @@ impl IoKitDevice {
         let is_charging = ps.get_bool(b"IsCharging")
             .expect("IOKit is not providing required data");
 
-        let voltage = ps.get_f64(b"Voltage")
+        let voltage = ps.get_u32(b"Voltage")
             .expect("IOKit is not providing required data");
-        let amperage = ps.get_f64(b"Amperage")
+        let amperage = ps.get_u32(b"Amperage")
             .expect("IOKit is not providing required data");
-        let design_capacity = ps.get_f64(b"DesignCapacity")
+        let design_capacity = ps.get_u32(b"DesignCapacity")
             .expect("IOKit is not providing required data");
-        let max_capacity = ps.get_f64(b"MaxCapacity")
+        let max_capacity = ps.get_u32(b"MaxCapacity")
             .expect("IOKit is not providing required data");
-        let current_capacity = ps.get_f64(b"CurrentCapacity")
+        let current_capacity = ps.get_u32(b"CurrentCapacity")
             .expect("IOKit is not providing required data");
         let temperature = ps.get_isize(b"Temperature")
-            .expect("IOKit is not providing required data");
-
+            .map(|value| value as f32 / 100.0);
         let instant_time_to_empty = ps.get_isize(b"InstantTimeToEmpty")
             .and_then(|val| {
                 if val == 65535 {
@@ -90,10 +89,10 @@ impl IoKitDevice {
             is_charging,
             voltage,
             amperage,
+            temperature,
             design_capacity,
             max_capacity,
             current_capacity,
-            temperature,
             manufacturer,
             model,
             serial_number,
@@ -104,46 +103,46 @@ impl IoKitDevice {
 }
 
 impl Device for IoKitDevice {
-    fn capacity(&self) -> f64 {
-        (self.energy_full() / self.energy_full_design()) * 100.0
+    fn capacity(&self) -> f32 {
+        ((self.energy_full() / self.energy_full_design()) * 100) as f32
     }
 
-    fn energy(&self) -> f64 {
-        self.current_capacity * self.voltage() / 1_000.0
+    fn energy(&self) -> u32 {
+        self.current_capacity * self.voltage
     }
 
-    fn energy_full(&self) -> f64 {
-        self.max_capacity * self.voltage() / 1_000.0
+    fn energy_full(&self) -> u32 {
+        self.max_capacity * self.voltage
     }
 
-    fn energy_full_design(&self) -> f64 {
-        self.design_capacity * self.voltage() / 1_000.0
+    fn energy_full_design(&self) -> u32 {
+        self.design_capacity * self.voltage
     }
 
-    fn energy_rate(&self) -> f64 {
-        self.amperage.abs() * self.voltage() / 1_000.0
+    fn energy_rate(&self) -> u32 {
+        self.amperage * self.voltage
     }
 
-    fn percentage(&self) -> f64 {
-        100.0 * self.energy() / self.energy_full()
+    fn percentage(&self) -> f32 {
+        (100 * self.energy() / self.energy_full()) as f32
     }
 
     fn state(&self) -> State {
         match () {
             _ if !self.external_connected => State::Discharging,
             _ if self.is_charging => State::Charging,
-            _ if self.current_capacity == 0.0 => State::Empty,
+            _ if self.current_capacity == 0 => State::Empty,
             _ if self.fully_charged => State::Full,
             _ => State::Unknown,
         }
     }
 
-    fn voltage(&self) -> f64 {
-        self.voltage / 1_000.0
+    fn voltage(&self) -> u32 {
+        self.voltage
     }
 
-    fn temperature(&self) -> f64 {
-        self.temperature as f64 / 100.0
+    fn temperature(&self) -> Option<f32> {
+        self.temperature
     }
 
     fn vendor(&self) -> Option<&str> {

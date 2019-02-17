@@ -75,18 +75,18 @@ impl BatteryInformation {
     }
 
     // Originally `mWh`,matches `Battery::energy_full_design` result
-    pub fn designed_capacity(&self) -> u64 {
-        u64::from(self.0.DesignedCapacity) / 1_000
+    pub fn designed_capacity(&self) -> u32 {
+        self.0.DesignedCapacity
     }
 
     // Originally `mWh`, matches `Battery::energy_full` result
-    pub fn full_charged_capacity(&self) -> u64 {
-        u64::from(self.0.FullChargedCapacity) / 1_000
+    pub fn full_charged_capacity(&self) -> u32 {
+        self.0.FullChargedCapacity
     }
 
     #[allow(dead_code)]
-    pub fn cycle_count(&self) -> u64 {
-        u64::from(self.0.CycleCount)
+    pub fn cycle_count(&self) -> u32 {
+        self.0.CycleCount
     }
 
 }

@@ -17,8 +17,16 @@ pub fn get_string<T: AsRef<Path>>(path: T) -> io::Result<String> {
     }
 }
 
-pub fn get_f64<T: AsRef<Path>>(path: T) -> io::Result<f64> {
+// TODO: Generic somehow?
+
+pub fn get_f32<T: AsRef<Path>>(path: T) -> io::Result<f32> {
     get_string(path).and_then(|value| {
-        value.parse::<f64>().map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        value.parse::<f32>().map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+    })
+}
+
+pub fn get_u32<T: AsRef<Path>>(path: T) -> io::Result<u32> {
+    get_string(path).and_then(|value| {
+        value.parse::<u32>().map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
     })
 }

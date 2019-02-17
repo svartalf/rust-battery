@@ -19,16 +19,16 @@ impl str::FromStr for State {
     type Err = io::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // TODO: Case-insensitive
         // TODO: Support strings that starts with `\0`
         // TODO: Support `not charging` value
-        // Ref: https://gitlab.freedesktop.org/upower/upower/blob/master/src/linux/up-device-supply.c#L452
+        // Ref: `up_device_supply_get_state` function at
+        //https://gitlab.freedesktop.org/upower/upower/blob/master/src/linux/up-device-supply.c#L452
         match s {
-            "Unknown" => Ok(State::Unknown),
-            "Empty" => Ok(State::Empty),
-            "Full" => Ok(State::Full),
-            "Charging" => Ok(State::Charging),
-            "Discharging" => Ok(State::Discharging),
+            _ if s.eq_ignore_ascii_case("Unknown") => Ok(State::Unknown),
+            _ if s.eq_ignore_ascii_case("Empty") => Ok(State::Empty),
+            _ if s.eq_ignore_ascii_case("Full") => Ok(State::Full),
+            _ if s.eq_ignore_ascii_case("Charging") => Ok(State::Charging),
+            _ if s.eq_ignore_ascii_case("Discharging") => Ok(State::Discharging),
             _ => Err(io::Error::from(io::ErrorKind::InvalidData)),
         }
     }

@@ -281,7 +281,7 @@ impl DeviceHandle {
         }
     }
 
-    pub fn temperature(&mut self) -> io::Result<f64> {
+    pub fn temperature(&mut self) -> io::Result<f32> {
         let mut query = ioctl::BatteryQueryInformation::default();
         query.BatteryTag = self.tag.BatteryTag;
         query.InformationLevel = ioctl::info_level::BatteryTemperature;
@@ -307,7 +307,7 @@ impl DeviceHandle {
         if res == 0 {
             Err(get_last_error())
         } else {
-            Ok(f64::from(out) * 10.0 - 273.15)
+            Ok((out as f32) * 10.0 - 273.15)
         }
     }
 

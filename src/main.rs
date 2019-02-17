@@ -13,6 +13,10 @@ fn format(val: Option<Duration>) -> String {
     format_duration(d).to_string()
 }
 
+fn from_millis(value: u32) -> f32 {
+    value as f32 / 1_000.0
+}
+
 fn main() {
     for (idx, bat) in battery::get().enumerate() {
         println!("Device:\t\t\t{}", idx);
@@ -21,11 +25,11 @@ fn main() {
         println!("S/N:\t\t\t{}", bat.serial_number().unwrap_or("N/A"));
         println!("battery");
         println!("  state:\t\t{}", bat.state());
-        println!("  energy:\t\t{:.2} Wh", bat.energy());
-        println!("  energy-full:\t\t{:.2} Wh", bat.energy_full());
-        println!("  energy-full-design:\t{:.2} Wh", bat.energy_full_design());
-        println!("  energy-rate:\t\t{:.2} Wh", bat.energy_rate());
-        println!("  voltage:\t\t{:.2} V", bat.voltage());
+        println!("  energy:\t\t{:.2} Wh", from_millis(bat.energy()));
+        println!("  energy-full:\t\t{:.2} Wh", from_millis(bat.energy_full()));
+        println!("  energy-full-design:\t{:.2} Wh", from_millis(bat.energy_full_design()));
+        println!("  energy-rate:\t\t{:.2} Wh", from_millis(bat.energy_rate()));
+        println!("  voltage:\t\t{:.2} V", from_millis(bat.voltage()));
         match bat.state() {
             battery::State::Discharging => {
                 println!("  time-to-empty\t\t{}", format(bat.time_to_empty()));
@@ -36,7 +40,12 @@ fn main() {
             _ => {},
         }
         println!("  percentage:\t\t{:.2}%", bat.percentage());
-        println!("  temperature:\t\t{:.2} °C", bat.temperature());
+        print!("  temperature:\t\t");
+        match bat.temperature() {
+            Some(value) => println!("{:.2} °C", value),
+            None => println!("N/A"),
+        }
+        println!("  capacity:\t\t{}%", bat.capacity());
         println!("  technology:\t\t{}", bat.technology());
     }
 }

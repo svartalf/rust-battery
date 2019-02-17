@@ -1,5 +1,4 @@
 use std::io;
-use std::time::Duration;
 
 use crate::{State, Technology};
 use crate::types::Device;
@@ -9,12 +8,12 @@ use super::ffi::DeviceHandle;
 pub struct PowerDevice {
     technology: Technology,
     state: State,
-    voltage: f64,
-    capacity: f64,
-    energy_rate: f64,
-    design_capacity: u64,
-    full_charged_capacity: u64,
-    temperature: f64,
+    voltage: u32,
+    capacity: u32,
+    energy_rate: u32,
+    design_capacity: u32,
+    full_charged_capacity: u32,
+    temperature: Option<f32>,
     device_name: Option<String>,
     manufacturer: Option<String>,
     serial_number: Option<String>,
@@ -50,12 +49,14 @@ impl PowerDevice {
             None => return Err(io::Error::from(io::ErrorKind::InvalidData)),
             Some(value) => value,
         };
-        let voltage = match status.capacity() {
+        let voltage = match status.voltage() {
             None => return Err(io::Error::from(io::ErrorKind::InvalidData)),
             Some(value) => value,
         };
-        // TODO: Handle temperature errors
-        let temperature = handle.temperature().unwrap_or(0.0);
+        let temperature = match handle.temperature() {
+            Ok(value) => Some(value),
+            Err(_) => None,
+        };
 
         Ok(PowerDevice {
             technology: info.technology(),
@@ -75,39 +76,39 @@ impl PowerDevice {
 }
 
 impl Device for PowerDevice {
-    fn capacity(&self) -> f64 {
-        (self.energy_full() / self.energy_full_design()) * 100.0
+    fn capacity(&self) -> f32 {
+        ((self.energy_full() / self.energy_full_design()) * 100) as f32
     }
 
-    fn energy(&self) -> f64 {
+    fn energy(&self) -> u32 {
         self.capacity
     }
 
-    fn energy_full(&self) -> f64 {
-        self.full_charged_capacity as f64
+    fn energy_full(&self) -> u32 {
+        self.full_charged_capacity
     }
 
-    fn energy_full_design(&self) -> f64 {
-        self.design_capacity as f64
+    fn energy_full_design(&self) -> u32 {
+        self.design_capacity
     }
 
-    fn energy_rate(&self) -> f64 {
-        0.0
+    fn energy_rate(&self) -> u32 {
+        self.energy_rate
     }
 
-    fn percentage(&self) -> f64 {
-        set_bounds(100.0 * self.energy() / self.energy_full())
+    fn percentage(&self) -> f32 {
+        set_bounds(100 * self.energy() / self.energy_full()) as f32
     }
 
     fn state(&self) -> State {
         self.state
     }
 
-    fn voltage(&self) -> f64 {
+    fn voltage(&self) -> u32 {
         self.voltage
     }
 
-    fn temperature(&self) -> f64 {
+    fn temperature(&self) -> Option<f32> {
         self.temperature
     }
 
@@ -126,44 +127,13 @@ impl Device for PowerDevice {
     fn technology(&self) -> Technology {
         self.technology
     }
-
-    fn time_to_full(&self) -> Option<Duration> {
-        match self.state() {
-            State::Charging => {
-                let time_to_full = 3600.0 * (self.energy_full() - self.energy()) / self.energy_rate();
-                if time_to_full > (20.0 * 60.0 * 60.0) {
-                    None
-                } else {
-                    Some(Duration::from_secs(time_to_full as u64))
-                }
-            },
-            _ => None,
-        }
-    }
-
-    fn time_to_empty(&self) -> Option<Duration> {
-        match self.state() {
-            State::Discharging => {
-                let time_to_empty = 3600.0 * self.energy() / self.energy_rate();
-                if time_to_empty > (240.0 * 60.0 * 60.0) { // Ten days for discharging
-                    None
-                } else {
-                    Some(Duration::from_secs(time_to_empty as u64))
-                }
-            },
-            _ => None,
-        }
-    }
 }
 
 #[inline]
-fn set_bounds(value: f64) -> f64 {
-    if value < 0.0 {
-        return 0.0;
+fn set_bounds(value: u32) -> u32 {
+    if value > 100 {
+        100
+    } else {
+        value
     }
-    if value > 100.0 {
-        return 100.0;
-    }
-
-    value
 }
