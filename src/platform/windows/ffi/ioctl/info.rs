@@ -84,9 +84,12 @@ impl BatteryInformation {
         self.0.FullChargedCapacity
     }
 
-    #[allow(dead_code)]
-    pub fn cycle_count(&self) -> u32 {
-        self.0.CycleCount
+    pub fn cycle_count(&self) -> Option<u32> {
+        if self.0.CycleCount == 0 {
+            None
+        } else {
+            Some(self.0.CycleCount)
+        }
     }
 
 }

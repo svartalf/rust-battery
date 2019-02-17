@@ -32,6 +32,8 @@ pub trait Device {
 
     fn technology(&self) -> Technology;
 
+    fn cycle_count(&self) -> Option<u32>;
+
     // Default implementation for `time_to_full` and `time_to_empty`
     // uses calculation based on the current energy flow,
     // but if device provides by itself provides these **instant** values (do not use average values),

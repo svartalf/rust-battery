@@ -24,6 +24,7 @@ pub struct IoKitDevice{
     voltage: u32, // mV
     amperage: u32, // mA
     temperature: Option<f32>,
+    cycle_count: Option<u32>,
 
     design_capacity: u32, // mAh
     max_capacity: u32, // mAh
@@ -60,6 +61,7 @@ impl IoKitDevice {
             .expect("IOKit is not providing required data");
         let temperature = ps.get_isize(b"Temperature")
             .map(|value| value as f32 / 100.0);
+        let cycle_count = ps.get_u32(b"CycleCount");
         let instant_time_to_empty = ps.get_isize(b"InstantTimeToEmpty")
             .and_then(|val| {
                 if val == 65535 {
@@ -90,6 +92,7 @@ impl IoKitDevice {
             voltage,
             amperage,
             temperature,
+            cycle_count,
             design_capacity,
             max_capacity,
             current_capacity,
@@ -159,6 +162,10 @@ impl Device for IoKitDevice {
 
     fn technology(&self) -> Technology {
         Technology::Unknown
+    }
+
+    fn cycle_count(&self) -> Option<u32> {
+        self.cycle_count
     }
 
     fn time_to_full(&self) -> Option<Duration> {

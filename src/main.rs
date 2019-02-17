@@ -28,7 +28,7 @@ fn main() {
         println!("  energy:\t\t{:.2} Wh", from_millis(bat.energy()));
         println!("  energy-full:\t\t{:.2} Wh", from_millis(bat.energy_full()));
         println!("  energy-full-design:\t{:.2} Wh", from_millis(bat.energy_full_design()));
-        println!("  energy-rate:\t\t{:.2} Wh", from_millis(bat.energy_rate()));
+        println!("  energy-rate:\t\t{:.2} W", from_millis(bat.energy_rate()));
         println!("  voltage:\t\t{:.2} V", from_millis(bat.voltage()));
         match bat.state() {
             battery::State::Discharging => {
@@ -45,7 +45,12 @@ fn main() {
             Some(value) => println!("{:.2} °C", value),
             None => println!("N/A"),
         }
-        println!("  capacity:\t\t{}%", bat.capacity());
+        println!("  capacity:\t\t{:.2}%", bat.capacity());
+        print!("  cycle-count:\t\t");
+        match bat.cycle_count() {
+            Some(value) => println!("{}", value),
+            None => println!("N/A"),
+        }
         println!("  technology:\t\t{}", bat.technology());
     }
 }

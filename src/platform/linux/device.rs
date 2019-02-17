@@ -28,6 +28,7 @@ pub struct SysFsDevice {
     percentage: Lazy<f32>, // 0.0 .. 100.0
 
     temperature: Lazy<Option<f32>>,
+    cycle_count: Lazy<Option<u32>>,
 
     state: Lazy<State>,
     technology: Lazy<Technology>,
@@ -70,9 +71,10 @@ impl SysFsDevice {
         let _ = self.vendor();
         let _ = self.model();
         let _ = self.serial_number();
+        let _ = self.cycle_count();
     }
 
-    fn design_voltage(&self) -> u32 { // mV
+    fn design_voltage(&self) -> u32 {
         *self.design_voltage.get_or_create(|| {
             DESIGN_VOLTAGE_PROBES.iter()
             .filter_map(|filename| {
@@ -83,7 +85,7 @@ impl SysFsDevice {
             })
             .next()
             // Same to `upower`, using 10V as an approximation
-            .unwrap_or(10_000)
+            .unwrap_or(10)
         })
     }
 
@@ -303,6 +305,15 @@ impl Device for SysFsDevice {
             match sysfs::get_string(self.root.join("technology")) {
                 Ok(ref tech) => Technology::from_str(tech).unwrap_or(Technology::Unknown),
                 Err(_) => Technology::Unknown,
+            }
+        })
+    }
+
+    fn cycle_count(&self) -> Option<u32> {
+        *self.cycle_count.get_or_create(|| {
+            match sysfs::get_u32(self.root.join("cycle_count")) {
+                Ok(value) => Some(value),
+                Err(_) => None,
             }
         })
     }

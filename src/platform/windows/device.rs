@@ -14,6 +14,7 @@ pub struct PowerDevice {
     design_capacity: u32,
     full_charged_capacity: u32,
     temperature: Option<f32>,
+    cycle_count: Option<u32>,
     device_name: Option<String>,
     manufacturer: Option<String>,
     serial_number: Option<String>,
@@ -64,6 +65,7 @@ impl PowerDevice {
             energy_rate: rate,
             design_capacity: info.designed_capacity(),
             full_charged_capacity: info.full_charged_capacity(),
+            cycle_count: info.cycle_count(),
             capacity,
             voltage,
             temperature,
@@ -110,6 +112,10 @@ impl Device for PowerDevice {
 
     fn temperature(&self) -> Option<f32> {
         self.temperature
+    }
+
+    fn cycle_count(&self) -> Option<u32> {
+        self.cycle_count
     }
 
     fn vendor(&self) -> Option<&str> {

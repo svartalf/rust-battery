@@ -12,54 +12,6 @@ pub struct Battery(BatteryDevice);
 
 impl Battery {
 
-    /// Gets battery current state.
-    ///
-    /// See [State](enum.State.html) enum for possible values.
-    pub fn state(&self) -> State {
-        self.0.state()
-    }
-
-    /// Gets battery technology.
-    ///
-    /// See [Technology](enum.Technology.html) enum for possible values.
-    ///
-    /// ## Compatibility
-    ///
-    /// * For MacOS this method always returns `None`. This behavior might change later.
-    pub fn technology(&self) -> Technology {
-        self.0.technology()
-    }
-
-    /// Gets battery vendor.
-    pub fn vendor(&self) -> Option<&str> {
-        self.0.vendor()
-    }
-
-    /// Gets battery model.
-    pub fn model(&self) -> Option<&str> {
-        self.0.model()
-    }
-
-    /// Gets battery serial number.
-    pub fn serial_number(&self) -> Option<&str> {
-        self.0.serial_number()
-    }
-
-    /// Gets battery capacity in `0.0..100.0` percents range.
-    pub fn capacity(&self) -> f32 {
-        self.0.capacity()
-    }
-
-    /// Gets battery temperature in Celsius degrees.
-    ///
-    /// ## Compatibility
-    ///
-    /// Not all device drivers are providing this value, therefore callers should not
-    /// expect to have some all the time.
-    pub fn temperature(&self) -> Option<f32> {
-        self.0.temperature()
-    }
-
     /// The amount of energy left in the battery expressed as a percentage between `0.0` and `100.0`.
     pub fn percentage(&self) -> f32 {
         self.0.percentage()
@@ -88,6 +40,59 @@ impl Battery {
     /// Gets a battery voltage (in `mV`).
     pub fn voltage(&self) -> u32 {
         self.0.voltage()
+    }
+
+    /// Gets battery capacity in `0.0..100.0` percents range.
+    pub fn capacity(&self) -> f32 {
+        self.0.capacity()
+    }
+
+    /// Gets battery current state.
+    ///
+    /// See [State](enum.State.html) enum for possible values.
+    pub fn state(&self) -> State {
+        self.0.state()
+    }
+
+    /// Gets battery technology.
+    ///
+    /// See [Technology](enum.Technology.html) enum for possible values.
+    ///
+    /// ## Compatibility
+    ///
+    /// * For MacOS this method always returns `None`. This behavior might change later.
+    pub fn technology(&self) -> Technology {
+        self.0.technology()
+    }
+
+    /// Gets battery temperature in Celsius degrees.
+    ///
+    /// ## Compatibility
+    ///
+    /// Not all device drivers are providing this value, therefore callers should not
+    /// expect to have some all the time.
+    pub fn temperature(&self) -> Option<f32> {
+        self.0.temperature()
+    }
+
+    /// Number of charge/discharge cycles
+    pub fn cycle_count(&self) -> Option<u32> {
+        self.0.cycle_count()
+    }
+
+    /// Gets battery vendor.
+    pub fn vendor(&self) -> Option<&str> {
+        self.0.vendor()
+    }
+
+    /// Gets battery model.
+    pub fn model(&self) -> Option<&str> {
+        self.0.model()
+    }
+
+    /// Gets battery serial number.
+    pub fn serial_number(&self) -> Option<&str> {
+        self.0.serial_number()
     }
 
     /// Gets a remaining time till full battery.
@@ -126,6 +131,7 @@ impl fmt::Debug for Battery {
             .field("capacity", &self.capacity())
             .field("temperature", &self.temperature())
             .field("percentage", &self.percentage())
+            .field("cycle_count", &self.cycle_count())
 
             // energy stats
             .field("energy", &self.energy())
