@@ -9,6 +9,11 @@ cfg_if! {
 
         pub type BatteryIterator = macos::IoKitDiscovery;
         pub type BatteryDevice = macos::IoKitDevice;
+    } else if #[cfg(target_os = "windows")] {
+        mod windows;
+
+        pub type BatteryIterator = windows::PowerManager;
+        pub type BatteryDevice = windows::PowerDevice;
     } else {
         compile_error!("Support for this target OS is not implemented yet!\n \
             You may want to create an issue: https://github.com/svartalf/rust-battery/issues/new");

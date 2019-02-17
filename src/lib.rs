@@ -10,6 +10,9 @@
 
 #[macro_use] extern crate cfg_if;
 
+#[cfg(target_os = "windows")]
+#[macro_use] extern crate winapi;
+
 mod types;
 mod platform;
 

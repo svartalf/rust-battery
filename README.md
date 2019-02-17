@@ -2,7 +2,8 @@
 
 [![Latest Version](https://img.shields.io/crates/v/battery.svg)](https://crates.io/crates/battery)
 [![Latest Version](https://docs.rs/battery/badge.svg)](https://docs.rs/battery)
-[![dependency status](https://deps.rs/crate/battery/0.3.1/status.svg)](https://deps.rs/crate/battery/0.3.1)
+[![Build Status](https://travis-ci.org/svartalf/rust-battery.svg?branch=master)](https://travis-ci.org/svartalf/rust-battery)
+[![dependency status](https://deps.rs/crate/battery/0.3.1/status.svg)](https://deps.rs/crate/battery/0.4.0)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
 
 Rust crate providing cross-platform information about batteries.
@@ -14,12 +15,13 @@ recalculated as necessary to be returned in `W`, `Wh` or `V` units.
 
 * Linux 2.6.39+
 * MacOS (10.10+ probably, needs to be confirmed)
+* Windows 7+
 
 ## Example
 
 This crate acts both as library and as binary executable, so you can install and check it:
 
-1. Run following command in console:
+1. Install `battery` crate:
 
 ```bash
 $ cargo install battery
