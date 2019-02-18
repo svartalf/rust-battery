@@ -218,7 +218,7 @@ impl Device for SysFsDevice {
             // }
 
             // Some batteries give out massive rate values when nearly empty
-             if value < 10_000 {
+             if value < 10 {
                  value = 0;
              }
 

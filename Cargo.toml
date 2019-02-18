@@ -1,6 +1,6 @@
 [package]
 name = "battery"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "Cross-platform information about batteries"

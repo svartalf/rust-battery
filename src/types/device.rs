@@ -42,6 +42,7 @@ pub trait Device {
     fn time_to_full(&self) -> Option<Duration> {
         match self.state() {
             State::Charging => {
+                // TODO: Possible division by zero
                 let time_to_full = 3600 * (self.energy_full() - self.energy()) / self.energy_rate();
                 if time_to_full > (20 * 60 * 60) {
                     None
@@ -56,6 +57,7 @@ pub trait Device {
     fn time_to_empty(&self) -> Option<Duration> {
         match self.state() {
             State::Discharging => {
+                // TODO: Possible division by zero
                 let time_to_empty = 3600 * self.energy() / self.energy_rate();
                 if time_to_empty > (240 * 60 * 60) { // Ten days for discharging
                     None

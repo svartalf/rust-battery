@@ -9,7 +9,7 @@
 Rust crate providing cross-platform information about batteries.
 
 Gives access to a system independent battery state, capacity, charge and voltage values
-recalculated as necessary to be returned in `W`, `Wh` or `V` units.
+recalculated as necessary to be returned in `mW`, `mWh` or `mV` units.
 
 ## Supported platforms
 
