@@ -3,7 +3,7 @@
 [![Latest Version](https://img.shields.io/crates/v/battery.svg)](https://crates.io/crates/battery)
 [![Latest Version](https://docs.rs/battery/badge.svg)](https://docs.rs/battery)
 [![Build Status](https://travis-ci.org/svartalf/rust-battery.svg?branch=master)](https://travis-ci.org/svartalf/rust-battery)
-[![dependency status](https://deps.rs/crate/battery/0.4.0/status.svg)](https://deps.rs/crate/battery/0.4.0)
+[![dependency status](https://deps.rs/crate/battery/0.4.1/status.svg)](https://deps.rs/crate/battery/0.4.1)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
 
 Rust crate providing cross-platform information about batteries.
@@ -40,14 +40,17 @@ vendor:                 DP
 model:                  bq20z451
 S/N:                    N/A
 battery
-  state:                full
-  energy:               35.32 Wh
-  energy-full:          36.21 Wh
-  energy-full-design:   54.34 Wh
-  energy-rate:          0.00 Wh
-  voltage:              8.44 V
-  percentage:           65.00%
-  temperature:          36.60 °C
+  state:                discharging
+  energy:               27.50 Wh
+  energy-full:          33.75 Wh
+  energy-full-design:   50.05 Wh
+  energy-rate:          13.94 W
+  voltage:              7.83 V
+  time-to-empty         1h 58m 18s
+  percentage:           55.00%
+  temperature:          29.70 °C
+  capacity:             67.43%
+  cycle-count:          692
   technology:           lithium-ion
 ```
 
