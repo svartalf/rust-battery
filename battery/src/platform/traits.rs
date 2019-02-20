@@ -1,9 +1,15 @@
+use std::io;
 use std::time::Duration;
 
-use crate::{State, Technology};
+use crate::{Battery, State, Technology};
 
+pub trait BatteryManager: Default + Sized {
+    fn refresh(&mut self, battery: &mut Battery) -> io::Result<()>;
+}
 
-pub trait Device {
+pub trait BatteryIterator: Iterator<Item=Battery> + Sized {}
+
+pub trait BatteryDevice: Sized {
     // TODO: Cycle count
 
     fn capacity(&self) -> f32;
@@ -42,8 +48,16 @@ pub trait Device {
     fn time_to_full(&self) -> Option<Duration> {
         match self.state() {
             State::Charging => {
+                // Some drivers might report that `energy_full` is lower than `energy`,
+                // but battery is still charging. What should we do in that case?
+                // As for now, assuming that battery is fully charged, since we can't guess,
+                // how much time left.
+                let energy_left = match self.energy_full().checked_sub(self.energy()) {
+                    Some(value) => value,
+                    None => return None,
+                };
                 // TODO: Possible division by zero
-                let time_to_full = 3600 * (self.energy_full() - self.energy()) / self.energy_rate();
+                let time_to_full = 3600 * energy_left / self.energy_rate();
                 if time_to_full > (20 * 60 * 60) {
                     None
                 } else {
@@ -70,3 +84,4 @@ pub trait Device {
     }
 
 }
+

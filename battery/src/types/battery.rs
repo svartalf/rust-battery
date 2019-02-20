@@ -2,13 +2,13 @@ use std::fmt;
 use std::time::Duration;
 
 use crate::{State, Technology};
-use crate::types::Device;
-use crate::platform::BatteryDevice;
+use crate::platform::traits::BatteryDevice;
+use crate::platform::Device;
 
 /// Battery instant information representation.
 ///
 /// Consequent calls of the same method will return the same value.
-pub struct Battery(BatteryDevice);
+pub struct Battery(Device);
 
 impl Battery {
 
@@ -115,6 +115,14 @@ impl Battery {
         self.0.time_to_empty()
     }
 
+    #[allow(dead_code)]
+    pub(crate) fn get_ref(&self) -> &Device {
+        &self.0
+    }
+
+    pub(crate) fn get_mut_ref(&mut self) -> &mut Device {
+        &mut self.0
+    }
 }
 
 impl fmt::Debug for Battery {
@@ -148,8 +156,8 @@ impl fmt::Debug for Battery {
     }
 }
 
-impl From<BatteryDevice> for Battery {
-    fn from(inner: BatteryDevice) -> Self {
+impl From<Device> for Battery {
+    fn from(inner: Device) -> Self {
         Battery(inner)
     }
 }

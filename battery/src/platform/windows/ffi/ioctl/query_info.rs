@@ -25,7 +25,7 @@ impl Default for BATTERY_QUERY_INFORMATION {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BatteryQueryInformation(BATTERY_QUERY_INFORMATION);
 
 impl Default for BatteryQueryInformation {

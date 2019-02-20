@@ -1,11 +1,15 @@
 use std::io;
 
 use crate::{State, Technology};
-use crate::types::Device;
+use crate::platform::traits::BatteryDevice;
 use super::ffi::DeviceHandle;
+use super::ffi::BatteryQueryInformation;
 
 #[derive(Debug)]
 pub struct PowerDevice {
+    // Used later for information refreshing
+    tag: BatteryQueryInformation,
+
     technology: Technology,
     state: State,
     voltage: u32,
@@ -60,6 +64,7 @@ impl PowerDevice {
         };
 
         Ok(PowerDevice {
+            tag: handle.tag,
             technology: info.technology(),
             state: status.state(),
             energy_rate: rate,
@@ -75,9 +80,13 @@ impl PowerDevice {
         })
     }
 
+    pub fn tag(&self) -> &BatteryQueryInformation {
+        &self.tag
+    }
+
 }
 
-impl Device for PowerDevice {
+impl BatteryDevice for PowerDevice {
     fn capacity(&self) -> f32 {
         ((self.energy_full() / self.energy_full_design()) * 100) as f32
     }

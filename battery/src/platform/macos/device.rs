@@ -10,7 +10,8 @@ use std::io;
 use std::str;
 use std::time::Duration;
 
-use crate::types::{State, Technology, Device};
+use crate::types::{State, Technology};
+use crate::platform::traits::BatteryDevice;
 use super::iokit;
 
 #[derive(Debug)]
@@ -44,7 +45,7 @@ impl IoKitDevice {
 
         let fully_charged = ps.get_bool(b"FullyCharged")
             .expect("IOKit is not providing required data");
-        let external_connected = ps.get_bool(b"FullyCharged")
+        let external_connected = ps.get_bool(b"ExternalConnected")
             .expect("IOKit is not providing required data");
         let is_charging = ps.get_bool(b"IsCharging")
             .expect("IOKit is not providing required data");
@@ -105,7 +106,7 @@ impl IoKitDevice {
     }
 }
 
-impl Device for IoKitDevice {
+impl BatteryDevice for IoKitDevice {
     fn capacity(&self) -> f32 {
         ((self.energy_full() / self.energy_full_design()) * 100) as f32
     }

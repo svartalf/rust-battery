@@ -14,6 +14,7 @@ mod ioctl;
 mod wrappers;
 mod wide_string;
 
+pub(crate) use self::ioctl::BatteryQueryInformation;
 use self::wide_string::WideString;
 use self::wrappers::*;
 
@@ -90,7 +91,7 @@ impl DeviceIterator {
             return Err(io::Error::from_raw_os_error(result as i32))
         }
 
-        let mut pdidd= unsafe {
+        let mut pdidd = unsafe {
             winbase::LocalAlloc(minwinbase::LPTR, buf_size as basetsd::SIZE_T)
                 as setupapi::PSP_DEVICE_INTERFACE_DETAIL_DATA_W
         };
@@ -161,29 +162,23 @@ impl DeviceIterator {
 
         Ok(query)
     }
+
+    pub fn prepare_handle(&self) -> io::Result<Handle> {
+        let mut interface_data = self.get_interface_data()?;
+        let interface_detail_data = self.get_interface_detail(&mut interface_data)?;
+
+        self.get_handle(&interface_detail_data)
+    }
+
 }
 
 impl iter::Iterator for DeviceIterator {
     type Item = DeviceHandle;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut interface_data = match self.get_interface_data() {
-            Ok(data) => data,
-            Err(_) => {
-                return None
-            }
-        };
-        let interface_detail_data = match self.get_interface_detail(&mut interface_data) {
-            Ok(detail_data) => detail_data,
-            Err(_) => {
-                return None
-            }
-        };
-        let mut handle = match self.get_handle(&interface_detail_data) {
-            Ok(handle) => handle,
-            Err(_) => {
-                return None
-            }
+        let mut handle = match self.prepare_handle() {
+            Ok(h) => h,
+            Err(_) => return None,
         };
 
         let tag = match self.get_tag(&mut handle) {
@@ -196,7 +191,7 @@ impl iter::Iterator for DeviceIterator {
         self.current += 1;
 
         Some(DeviceHandle {
-            interface_details: interface_detail_data,
+//            interface_details: interface_detail_data,
             handle: handle,
             tag: tag,
         })
@@ -216,10 +211,10 @@ impl Drop for DeviceIterator {
 // Our inner representation of the battery device.
 #[derive(Debug)]
 pub struct DeviceHandle {
-    interface_details: InterfaceDetailData,
-    handle: Handle,
+//    interface_details: InterfaceDetailData,
+    pub handle: Handle,
     // TODO: Carry only `.BatteryTag` field ?
-    tag: ioctl::BatteryQueryInformation,
+    pub tag: ioctl::BatteryQueryInformation,
 }
 
 impl DeviceHandle {

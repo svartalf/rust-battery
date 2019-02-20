@@ -9,7 +9,11 @@
 //! * MacOS (10.10+ probably, needs to be confirmed)
 //! * Windows 7+
 //!
-//! For a quick example see either [get](fn.get.html) function or `main.rs` file in the sources.
+//! ## Examples
+//!
+//! For a quick example see [Manager](struct.Manager.html) type.
+//!
+//! For a real-live example see [battery-cli](https://crates.io/crate/battery-cli) crate.
 
 #[macro_use] extern crate cfg_if;
 
@@ -19,5 +23,4 @@
 mod types;
 mod platform;
 
-pub use types::{Battery, State, Technology};
-pub use platform::get;
+pub use types::{Manager, Batteries, Battery, State, Technology};

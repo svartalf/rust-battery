@@ -1,0 +1,23 @@
+[package]
+name = "battery-cli"
+version = "0.1.0"
+authors = ["svartalf <self@svartalf.info>"]
+edition = "2018"
+exclude = ["/rassets"]
+
+[[bin]]
+name = "battery"
+path = "src/main.rs"
+doc = false
+test = false
+
+[dependencies]
+cfg-if = "0.1"
+
+[target.'cfg(not(windows))'.dependencies]
+battery = { path = "../battery" }
+
+humantime = "1.2.0"
+tui = "0.4.0"
+termion = "1.5.1"
+itertools = "0.8.0"

@@ -1,0 +1,31 @@
+[package]
+name = "battery"
+version = "0.5.0"
+authors = ["svartalf <self@svartalf.info>"]
+edition = "2018"
+description = "Cross-platform information about batteries"
+repository = "https://github.com/svartalf/rust-battery"
+readme = "README.md"
+categories = ["os"]
+keywords = ["battery", "linux", "macos", "windows"]
+license = "Apache-2.0 OR MIT"
+build = "build.rs"
+
+[badges]
+travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+cfg-if = "0.1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+lazy-init = "0.3"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+CoreFoundation-sys = "0.1.4"
+IOKit-sys = "0.1.5"
+mach = "0.1.2"
+libc = "0.2.48"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+winapi = { version ="0.3.6", features = ["impl-default", "devguid", "winbase", "ioapiset", "ntdef", "setupapi", "handleapi", "errhandlingapi", "winerror"] }

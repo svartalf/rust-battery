@@ -1,3 +1,4 @@
+use std::io;
 use std::str::FromStr;
 use std::path::PathBuf;
 use std::default::Default;
@@ -5,7 +6,7 @@ use std::default::Default;
 use lazy_init::Lazy;
 
 use crate::{State, Technology};
-use crate::types::Device;
+use crate::platform::traits::BatteryDevice;
 use super::sysfs;
 
 const DESIGN_VOLTAGE_PROBES: [&str; 4] = [
@@ -16,7 +17,7 @@ const DESIGN_VOLTAGE_PROBES: [&str; 4] = [
 ];
 
 #[derive(Default)]
-pub struct SysFsDevice {
+pub struct Inner {
     root: PathBuf,
 
     design_voltage: Lazy<u32>,
@@ -37,9 +38,9 @@ pub struct SysFsDevice {
     serial_number: Lazy<Option<String>>,
 }
 
-impl SysFsDevice {
-    pub fn new(root: PathBuf) -> SysFsDevice {
-        let device = SysFsDevice {
+impl Inner {
+    pub fn new(root: PathBuf) -> Inner {
+        let device = Inner {
             root,
             ..Default::default()
         };
@@ -50,13 +51,14 @@ impl SysFsDevice {
     }
 }
 
-impl SysFsDevice {
-    // With current design, `SysFsDevice` is not an instant representation of the battery stats
+impl Inner {
+    // With current design, `Inner` is not an instant representation of the battery stats
     // because of `Lazy` fields. End user might fetch needed data with a significant time difference
     // which will lead to an inconsistent results.
     // All results should be loaded at the same time; as for now, making a quick hack
     // and preloading all the stuff in once.
-    // It seems that even with ignored results (`let _ = self...()`), rust still calls all required methods.
+    // It seems that even with ignored results (`let _ = self...()`), rust still calls all required methods,
+    // since we have side effects (file I/O)
     fn preload(&self) {
         let _ = self.design_voltage();
         let _ = self.energy();
@@ -103,7 +105,7 @@ impl SysFsDevice {
 
 }
 
-impl Device for SysFsDevice {
+impl BatteryDevice for Inner {
     fn capacity(&self) -> f32 {
         let energy_full = self.energy_full();
         if energy_full > 0 {
@@ -226,21 +228,6 @@ impl Device for SysFsDevice {
         })
     }
 
-    // mV
-    fn voltage(&self) -> u32 {
-        *self.voltage.get_or_create(|| {
-            ["voltage_now", "voltage_avg"].iter()
-                .filter_map(|filename| {
-                    match sysfs::get_u32(self.root.join(filename)) {
-                        Ok(voltage) if voltage > 1 => Some(voltage / 1_000),
-                        _ => None,
-                    }
-                })
-                .next()
-                .unwrap_or(0) // TODO: Check if it is really unreachable
-        })
-    }
-
     // 0.0..100.0
     fn percentage(&self) -> f32 {
         *self.percentage.get_or_create(|| {
@@ -259,6 +246,21 @@ impl Device for SysFsDevice {
             sysfs::get_string(self.root.join("status"))
                 .and_then(|x| State::from_str(&x))
                 .unwrap_or(State::Unknown)
+        })
+    }
+
+    // mV
+    fn voltage(&self) -> u32 {
+        *self.voltage.get_or_create(|| {
+            ["voltage_now", "voltage_avg"].iter()
+                .filter_map(|filename| {
+                    match sysfs::get_u32(self.root.join(filename)) {
+                        Ok(voltage) if voltage > 1 => Some(voltage / 1_000),
+                        _ => None,
+                    }
+                })
+                .next()
+                .unwrap_or(0) // TODO: Check if it is really unreachable
         })
     }
 
@@ -317,7 +319,79 @@ impl Device for SysFsDevice {
             }
         })
     }
+}
 
+#[derive(Default)]
+pub struct SysFsDevice(Inner);
+
+impl SysFsDevice {
+    pub fn new(root: PathBuf) -> SysFsDevice {
+        SysFsDevice(Inner::new(root))
+    }
+
+    pub fn refresh(&mut self) -> io::Result<()> {
+        self.0 = Inner::new(self.0.root.clone());
+
+        Ok(())
+    }
+}
+
+impl BatteryDevice for SysFsDevice {
+    fn capacity(&self) -> f32 {
+        self.0.capacity()
+    }
+
+    fn energy(&self) -> u32 {
+        self.0.energy()
+    }
+
+    fn energy_full(&self) -> u32 {
+        self.0.energy_full()
+    }
+
+    fn energy_full_design(&self) -> u32 {
+        self.0.energy_full_design()
+    }
+
+    fn energy_rate(&self) -> u32 {
+        self.0.energy_rate()
+    }
+
+    fn percentage(&self) -> f32 {
+        self.0.percentage()
+    }
+
+    fn state(&self) -> State {
+        self.0.state()
+    }
+
+    fn voltage(&self) -> u32 {
+        self.0.voltage()
+    }
+
+    fn temperature(&self) -> Option<f32> {
+        self.0.temperature()
+    }
+
+    fn vendor(&self) -> Option<&str> {
+        self.0.vendor()
+    }
+
+    fn model(&self) -> Option<&str> {
+        self.0.model()
+    }
+
+    fn serial_number(&self) -> Option<&str> {
+        self.0.serial_number()
+    }
+
+    fn technology(&self) -> Technology {
+        self.0.technology()
+    }
+
+    fn cycle_count(&self) -> Option<u32> {
+        self.0.cycle_count()
+    }
 }
 
 #[inline]
