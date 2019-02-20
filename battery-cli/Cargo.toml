@@ -3,7 +3,17 @@ name = "battery-cli"
 version = "0.1.0"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
-exclude = ["/rassets"]
+description = "CLI tool for batteries reports"
+repository = "https://github.com/svartalf/rust-battery"
+readme = "README.md"
+categories = ["os"]
+keywords = ["battery", "linux", "macos", "windows"]
+license = "Apache-2.0 OR MIT"
+exclude = ["/assets"]
+
+[badges]
+travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
+maintenance = { status = "actively-developed" }
 
 [[bin]]
 name = "battery"
