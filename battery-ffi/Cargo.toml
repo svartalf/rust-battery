@@ -1,0 +1,26 @@
+[package]
+name = "battery-ffi"
+version = "0.1.0"
+authors = ["svartalf <self@svartalf.info>"]
+edition = "2018"
+description = "FFI bindings for battery crate"
+repository = "https://github.com/svartalf/rust-battery"
+readme = "README.md"
+categories = ["os"]
+keywords = ["battery", "ffi", "linux", "macos", "windows"]
+license = "Apache-2.0 OR MIT"
+
+[badges]
+travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
+maintenance = { status = "actively-developed" }
+
+[lib]
+name = "battery_ffi"
+crate-type = ["cdylib"]
+
+[dependencies]
+battery = "0.5.0"
+libc = "0.2.48"
+
+[build-dependencies]
+cbindgen = "0.8.0"

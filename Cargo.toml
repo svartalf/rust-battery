@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "battery",
-    "battery-cli"
+    "battery-ffi",
+    "battery-cli",
 ]
