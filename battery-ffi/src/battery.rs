@@ -13,7 +13,7 @@ use crate::state::State;
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_percentage(ptr: *mut Battery) -> libc::c_float {
+pub unsafe extern fn battery_get_percentage(ptr: *const Battery) -> libc::c_float {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -26,7 +26,7 @@ pub unsafe extern fn battery_get_percentage(ptr: *mut Battery) -> libc::c_float 
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_energy(ptr: *mut Battery) -> libc::uint32_t {
+pub unsafe extern fn battery_get_energy(ptr: *const Battery) -> libc::uint32_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -39,7 +39,7 @@ pub unsafe extern fn battery_get_energy(ptr: *mut Battery) -> libc::uint32_t {
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_energy_full(ptr: *mut Battery) -> libc::uint32_t {
+pub unsafe extern fn battery_get_energy_full(ptr: *const Battery) -> libc::uint32_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -52,7 +52,7 @@ pub unsafe extern fn battery_get_energy_full(ptr: *mut Battery) -> libc::uint32_
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_energy_full_design(ptr: *mut Battery) -> libc::uint32_t {
+pub unsafe extern fn battery_get_energy_full_design(ptr: *const Battery) -> libc::uint32_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -65,7 +65,7 @@ pub unsafe extern fn battery_get_energy_full_design(ptr: *mut Battery) -> libc::
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_energy_rate(ptr: *mut Battery) -> libc::uint32_t {
+pub unsafe extern fn battery_get_energy_rate(ptr: *const Battery) -> libc::uint32_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -78,7 +78,7 @@ pub unsafe extern fn battery_get_energy_rate(ptr: *mut Battery) -> libc::uint32_
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_voltage(ptr: *mut Battery) -> libc::uint32_t {
+pub unsafe extern fn battery_get_voltage(ptr: *const Battery) -> libc::uint32_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -91,7 +91,7 @@ pub unsafe extern fn battery_get_voltage(ptr: *mut Battery) -> libc::uint32_t {
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_capacity(ptr: *mut Battery) -> libc::c_float {
+pub unsafe extern fn battery_get_capacity(ptr: *const Battery) -> libc::c_float {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -104,7 +104,7 @@ pub unsafe extern fn battery_get_capacity(ptr: *mut Battery) -> libc::c_float {
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_state(ptr: *mut Battery) -> State {
+pub unsafe extern fn battery_get_state(ptr: *const Battery) -> State {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -117,7 +117,7 @@ pub unsafe extern fn battery_get_state(ptr: *mut Battery) -> State {
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_technology(ptr: *mut Battery) -> Technology {
+pub unsafe extern fn battery_get_technology(ptr: *const Battery) -> Technology {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -134,7 +134,7 @@ pub unsafe extern fn battery_get_technology(ptr: *mut Battery) -> Technology {
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_temperature(ptr: *mut Battery) -> libc::c_float {
+pub unsafe extern fn battery_get_temperature(ptr: *const Battery) -> libc::c_float {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -154,7 +154,7 @@ pub unsafe extern fn battery_get_temperature(ptr: *mut Battery) -> libc::c_float
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_cycle_count(ptr: *mut Battery) -> libc::uint32_t {
+pub unsafe extern fn battery_get_cycle_count(ptr: *const Battery) -> libc::uint32_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -179,13 +179,13 @@ pub unsafe extern fn battery_get_cycle_count(ptr: *mut Battery) -> libc::uint32_
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_vendor(ptr: *mut Battery) -> *mut libc::c_char {
+pub unsafe extern fn battery_get_vendor(ptr: *const Battery) -> *mut libc::c_char {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
     match battery.vendor() {
-        Some(ref vendor) => {
-            let c_str = CString::new(*vendor).unwrap();
+        Some(vendor) => {
+            let c_str = CString::new(vendor).unwrap();
             c_str.into_raw()
         },
         None => ptr::null_mut(),
@@ -207,13 +207,13 @@ pub unsafe extern fn battery_get_vendor(ptr: *mut Battery) -> *mut libc::c_char 
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_model(ptr: *mut Battery) -> *mut libc::c_char {
+pub unsafe extern fn battery_get_model(ptr: *const Battery) -> *mut libc::c_char {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
     match battery.model() {
-        Some(ref model) => {
-            let c_str = CString::new(*model).unwrap();
+        Some(model) => {
+            let c_str = CString::new(model).unwrap();
             c_str.into_raw()
         },
         None => ptr::null_mut(),
@@ -235,13 +235,13 @@ pub unsafe extern fn battery_get_model(ptr: *mut Battery) -> *mut libc::c_char {
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_serial_number(ptr: *mut Battery) -> *mut libc::c_char {
+pub unsafe extern fn battery_get_serial_number(ptr: *const Battery) -> *mut libc::c_char {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
     match battery.serial_number() {
-        Some(ref sn) => {
-            let c_str = CString::new(*sn).unwrap();
+        Some(sn) => {
+            let c_str = CString::new(sn).unwrap();
             c_str.into_raw()
         },
         None => ptr::null_mut(),
@@ -259,7 +259,7 @@ pub unsafe extern fn battery_get_serial_number(ptr: *mut Battery) -> *mut libc::
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_time_to_full(ptr: *mut Battery) -> libc::uint64_t {
+pub unsafe extern fn battery_get_time_to_full(ptr: *const Battery) -> libc::uint64_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
@@ -280,7 +280,7 @@ pub unsafe extern fn battery_get_time_to_full(ptr: *mut Battery) -> libc::uint64
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_get_time_to_empty(ptr: *mut Battery) -> libc::uint64_t {
+pub unsafe extern fn battery_get_time_to_empty(ptr: *const Battery) -> libc::uint64_t {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 
