@@ -1,4 +1,5 @@
 use std::io;
+use std::convert::AsRef;
 use std::str::FromStr;
 use std::path::PathBuf;
 use std::default::Default;
@@ -281,7 +282,7 @@ impl BatteryDevice for Inner {
                 Ok(vendor) => Some(vendor),
                 Err(_) => None,
             }
-        }).as_ref().map(|str| str.as_ref())
+        }).as_ref().map(AsRef::as_ref)
     }
 
     fn model(&self) -> Option<&str> {
@@ -290,7 +291,7 @@ impl BatteryDevice for Inner {
                 Ok(model) => Some(model),
                 Err(_) => None,
             }
-        }).as_ref().map(|str| str.as_ref())
+        }).as_ref().map(AsRef::as_ref)
     }
 
     fn serial_number(&self) -> Option<&str> {
@@ -299,7 +300,7 @@ impl BatteryDevice for Inner {
                 Ok(serial) => Some(serial),
                 Err(_) => None,
             }
-        }).as_ref().map(|str| str.as_ref())
+        }).as_ref().map(AsRef::as_ref)
     }
 
     fn technology(&self) -> Technology {

@@ -1,6 +1,6 @@
 [package]
 name = "battery-cli"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "CLI tool for batteries reports"
@@ -9,7 +9,7 @@ readme = "README.md"
 categories = ["os"]
 keywords = ["battery", "linux", "macos", "windows"]
 license = "Apache-2.0 OR MIT"
-exclude = ["/assets"]
+exclude = ["assets"]
 
 [badges]
 travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
@@ -25,7 +25,7 @@ test = false
 cfg-if = "0.1"
 
 [target.'cfg(not(windows))'.dependencies]
-battery = "0.5.0"
+battery = "0.6.0"
 humantime = "1.2.0"
 tui = "0.4.0"
 termion = "1.5.1"

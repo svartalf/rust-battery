@@ -60,7 +60,7 @@ impl Battery {
     ///
     /// ## Compatibility
     ///
-    /// * For MacOS this method always returns `None`. This behavior might change later.
+    /// * For MacOS this method always returns `Technology::Unknown`. This behavior might change later.
     pub fn technology(&self) -> Technology {
         self.0.technology()
     }
@@ -69,13 +69,16 @@ impl Battery {
     ///
     /// ## Compatibility
     ///
-    /// Not all device drivers are providing this value, therefore callers should not
-    /// expect to have some all the time.
+    /// * For FreeBSD this method always returns `None`. This behavior might change later.
     pub fn temperature(&self) -> Option<f32> {
         self.0.temperature()
     }
 
     /// Number of charge/discharge cycles
+    ///
+    /// ## Compatibility
+    ///
+    /// * For FreeBSD this method always returns `None`. This behavior might change later.
     pub fn cycle_count(&self) -> Option<u32> {
         self.0.cycle_count()
     }

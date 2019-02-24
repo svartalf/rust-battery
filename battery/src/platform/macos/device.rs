@@ -8,6 +8,7 @@
 
 use std::io;
 use std::str;
+use std::convert::AsRef;
 use std::time::Duration;
 
 use crate::types::{State, Technology};
@@ -107,10 +108,6 @@ impl IoKitDevice {
 }
 
 impl BatteryDevice for IoKitDevice {
-    fn capacity(&self) -> f32 {
-        ((self.energy_full() / self.energy_full_design()) * 100) as f32
-    }
-
     fn energy(&self) -> u32 {
         self.current_capacity * self.voltage
     }
@@ -150,15 +147,15 @@ impl BatteryDevice for IoKitDevice {
     }
 
     fn vendor(&self) -> Option<&str> {
-        self.manufacturer.as_ref().map(|v| v.as_ref())
+        self.manufacturer.as_ref().map(AsRef::as_ref)
     }
 
     fn model(&self) -> Option<&str> {
-        self.model.as_ref().map(|v| v.as_ref())
+        self.model.as_ref().map(AsRef::as_ref)
     }
 
     fn serial_number(&self) -> Option<&str> {
-        self.serial_number.as_ref().map(|v| v.as_ref())
+        self.serial_number.as_ref().map(AsRef::as_ref)
     }
 
     fn technology(&self) -> Technology {

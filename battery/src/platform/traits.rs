@@ -10,9 +10,9 @@ pub trait BatteryManager: Default + Sized {
 pub trait BatteryIterator: Iterator<Item=Battery> + Sized {}
 
 pub trait BatteryDevice: Sized {
-    // TODO: Cycle count
-
-    fn capacity(&self) -> f32;
+    fn capacity(&self) -> f32 {
+        ((self.energy_full() / self.energy_full_design()) * 100) as f32
+    }
 
     fn energy(&self) -> u32;
 

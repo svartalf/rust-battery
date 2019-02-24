@@ -1,4 +1,5 @@
 use std::io;
+use std::convert::AsRef;
 
 use crate::{State, Technology};
 use crate::platform::traits::BatteryDevice;
@@ -87,10 +88,6 @@ impl PowerDevice {
 }
 
 impl BatteryDevice for PowerDevice {
-    fn capacity(&self) -> f32 {
-        ((self.energy_full() / self.energy_full_design()) * 100) as f32
-    }
-
     fn energy(&self) -> u32 {
         self.capacity
     }
@@ -128,15 +125,15 @@ impl BatteryDevice for PowerDevice {
     }
 
     fn vendor(&self) -> Option<&str> {
-        self.manufacturer.as_ref().map(|v| v.as_ref())
+        self.manufacturer.as_ref().map(AsRef::as_ref)
     }
 
     fn model(&self) -> Option<&str> {
-        self.device_name.as_ref().map(|v| v.as_ref())
+        self.device_name.as_ref().map(AsRef::as_ref)
     }
 
     fn serial_number(&self) -> Option<&str> {
-        self.serial_number.as_ref().map(|v| v.as_ref())
+        self.serial_number.as_ref().map(AsRef::as_ref)
     }
 
     fn technology(&self) -> Technology {

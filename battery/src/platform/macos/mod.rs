@@ -1,6 +1,5 @@
 use std::io;
 use std::iter;
-use std::default;
 
 use crate::Battery;
 use crate::platform::traits::{BatteryManager, BatteryIterator};
