@@ -53,8 +53,9 @@ impl IoKitDevice {
 
         let voltage = ps.get_u32(b"Voltage")
             .expect("IOKit is not providing required data");
-        let amperage = ps.get_u32(b"Amperage")
-            .expect("IOKit is not providing required data");
+        let amperage = ps.get_isize(b"Amperage")
+            .expect("IOKit is not providing required data")
+            .abs() as u32;
         let design_capacity = ps.get_u32(b"DesignCapacity")
             .expect("IOKit is not providing required data");
         let max_capacity = ps.get_u32(b"MaxCapacity")
@@ -69,7 +70,7 @@ impl IoKitDevice {
                 if val == 65535 {
                     None
                 } else {
-                    Some(val)
+                    Some(val * 60)
                 }
             });
         let instant_time_to_full = ps.get_isize(b"InstantTimeToFull")
@@ -77,7 +78,7 @@ impl IoKitDevice {
                 if val == 65535 {
                     None
                 } else {
-                    Some(val)
+                    Some(val * 60)
                 }
             });
 
@@ -125,7 +126,7 @@ impl BatteryDevice for IoKitDevice {
     }
 
     fn percentage(&self) -> f32 {
-        (100 * self.energy() / self.energy_full()) as f32
+        self.current_capacity as f32 / self.max_capacity as f32 * 100.0
     }
 
     fn state(&self) -> State {
