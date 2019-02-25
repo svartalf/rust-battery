@@ -32,7 +32,7 @@ impl<'a> App<'a> {
                 BatteryStats {
                     battery: b,
                     voltage_graph: graph::GraphData::new("Voltage", graph::GraphUnits::Volt),
-                    energy_rate_graph: graph::GraphData::new("Consumption", graph::GraphUnits::WattHour),
+                    energy_rate_graph: graph::GraphData::new("Consumption", graph::GraphUnits::Watt),
                     temperature_graph: graph::GraphData::new("Temperature",graph::GraphUnits::Celsius),
                 }
             })

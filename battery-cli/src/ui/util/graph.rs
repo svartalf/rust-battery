@@ -5,7 +5,7 @@ const RESOLUTION: usize = 512;
 #[derive(Debug)]
 pub enum GraphUnits {
     Volt,
-    WattHour,
+    Watt,
     Celsius,
 }
 
@@ -39,7 +39,7 @@ impl<'g> GraphData<'g> {
     pub fn current(&self) -> String {
         match self.units {
             GraphUnits::Volt => format!("{:.2} V", self.value_latest),
-            GraphUnits::WattHour => format!("{:.2} Wh", self.value_latest),
+            GraphUnits::Watt => format!("{:.2} W", self.value_latest),
             GraphUnits::Celsius => format!("{:.2} °C", self.value_latest),
         }
     }
@@ -59,7 +59,7 @@ impl<'g> GraphData<'g> {
     pub fn y_title(&self) -> &str {
         match self.units {
             GraphUnits::Volt => "V",
-            GraphUnits::WattHour => "Wh",
+            GraphUnits::Watt => "W",
             GraphUnits::Celsius => "°C",
         }
     }
