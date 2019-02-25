@@ -30,7 +30,7 @@ or at [crates.io](https://crates.rs/crate/battery-cli).
 
 ## FFI
 
-Experimental [battery-ffi](https://crates.io/crate/battery-ffi) crate
+Experimental [battery-ffi](https://crates.io/crates/battery-ffi) crate
 provides the FFI bindings to the `battery` crate, so it can be used with
 another languages.
 

@@ -7,7 +7,7 @@ description = "Cross-platform information about batteries"
 repository = "https://github.com/svartalf/rust-battery"
 readme = "README.md"
 categories = ["os"]
-keywords = ["battery", "linux", "macos", "windows"]
+keywords = ["battery", "linux", "macos", "windows", "freebsd", "dragonflybsd"]
 license = "Apache-2.0 OR MIT"
 build = "build.rs"
 

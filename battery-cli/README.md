@@ -9,7 +9,7 @@
 `battery-cli` is a Proof-Of-Concept binary crate, that provides terminal user interface
 with batteries details, similar to top, htop or other *top utilities.
 
-![Screenshot](./assets/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/svartalf/rust-battery/master/battery-cli/assets/screenshot.png)
 
 Since it is still in early stages, there might be a lot of bugs.
 Also, it is not working in Windows, sorry.
