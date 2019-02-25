@@ -125,7 +125,7 @@ impl BatteryDevice for IoKitDevice {
     }
 
     fn percentage(&self) -> f32 {
-        (100 * self.energy() / self.energy_full()) as f32
+        100.0f32 * ((self.energy() as f32) / (self.energy_full() as f32))
     }
 
     fn state(&self) -> State {
