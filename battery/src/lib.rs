@@ -31,4 +31,4 @@
 mod types;
 mod platform;
 
-pub use types::{Manager, Batteries, Battery, State, Technology};
+pub use self::types::{Manager, Batteries, Battery, State, Technology};

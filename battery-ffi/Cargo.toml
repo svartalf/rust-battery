@@ -22,7 +22,7 @@ crate-type = ["cdylib"]
 default = ["cbindgen"]
 
 [dependencies]
-battery = "0.6.0"
+battery = { path = "../battery" }
 libc = "0.2.48"
 
 [build-dependencies]
