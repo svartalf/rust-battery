@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/svartalf/rust-battery.svg?branch=master)](https://travis-ci.org/svartalf/rust-battery)
 [![dependency status](https://deps.rs/crate/battery/0.6.1/status.svg)](https://deps.rs/crate/battery/0.6.1)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsvartalf%2Frust-battery.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsvartalf%2Frust-battery?ref=badge_shield)
 
 Rust crate providing cross-platform information about batteries.
 
@@ -36,3 +37,7 @@ another languages.
 
 Check its [README](https://github.com/svartalf/rust-battery/tree/master/battery-ffi)
 and [documentation](https://docs.rs/battery-ffi) for details.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsvartalf%2Frust-battery.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsvartalf%2Frust-battery?ref=badge_large)
