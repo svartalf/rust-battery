@@ -1,10 +1,14 @@
 use std::io;
+use std::i32;
 use std::mem;
+use std::time::Duration;
 use std::ffi::{CStr, CString};
 
 use CoreFoundation_sys as core;
 use IOKit_sys as iokit;
 use mach::{port, kern_return};
+
+use super::traits::DataSource;
 
 const IOPM_SERVICE_NAME: *const libc::c_char = b"IOPMPowerSource\0".as_ptr() as *const libc::c_char;
 
@@ -12,7 +16,7 @@ const IOPM_SERVICE_NAME: *const libc::c_char = b"IOPMPowerSource\0".as_ptr() as 
 pub struct PowerSource(core::dictionary::CFMutableDictionaryRef);
 
 impl PowerSource {
-    pub fn new() -> io::Result<PowerSource> {
+    pub fn get_props() -> io::Result<PowerSource> {
         let mut master_port: port::mach_port_t = port::MACH_PORT_NULL;
 
         let res = unsafe {
@@ -45,6 +49,7 @@ impl PowerSource {
 
         // Uncomment this to see all existing keys in the `props`.
         // Will write to stderr. Do not use in production.
+        //
         // unsafe { core::CFShow(props as *const libc::c_void); }
 
         unsafe {
@@ -118,6 +123,30 @@ impl PowerSource {
         }
     }
 
+    pub fn get_i32(&self, key: &[u8]) -> Option<i32> {
+        if let Some(value_ptr) = self.get_dict_value_ptr(key) {
+            unsafe {
+                debug_assert!(core::CFGetTypeID(value_ptr) == core::CFNumberGetTypeID());
+            }
+
+            let mut value = 0i32;
+            let res = unsafe {
+                core::CFNumberGetValue(
+                    value_ptr as core::CFNumberRef,
+                    core::kCFNumberIntType,
+                    &mut value as *mut _ as *mut libc::c_void
+                )
+            };
+            if res == 1 {
+                Some(value)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
     pub fn get_string(&self, key: &[u8]) -> Option<String> {
         if let Some(value_ptr) = self.get_dict_value_ptr(key) {
             unsafe {
@@ -172,6 +201,86 @@ impl PowerSource {
         }
     }
 
+}
+
+impl DataSource for PowerSource {
+    fn new() -> io::Result<PowerSource> where Self: Sized {
+        PowerSource::get_props()
+    }
+
+    fn fully_charged(&self) -> bool {
+        self.get_bool(b"FullyCharged")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn external_connected(&self) -> bool {
+        self.get_bool(b"ExternalConnected")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn is_charging(&self) -> bool {
+        self.get_bool(b"IsCharging")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn voltage(&self) -> u32 {
+        self.get_u32(b"Voltage")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn amperage(&self) -> i32 {
+        self.get_i32(b"Amperage")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn design_capacity(&self) -> u32 {
+        self.get_u32(b"DesignCapacity")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn max_capacity(&self) -> u32 {
+        self.get_u32(b"MaxCapacity")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn current_capacity(&self) -> u32 {
+        self.get_u32(b"CurrentCapacity")
+            .expect("IOKit is not providing required data")
+    }
+
+    fn temperature(&self) -> Option<f32> {
+        self.get_isize(b"Temperature")
+            .map(|value| value as f32 / 100.0)
+    }
+
+    fn cycle_count(&self) -> Option<u32> {
+        self.get_u32(b"CycleCount")
+    }
+
+    fn time_remaining(&self) -> Option<Duration> {
+        self.get_i32(b"TimeRemaining")
+            .and_then(|val| {
+                if val == i32::MAX {
+                    None
+                } else {
+                    // TODO: Is it possible to have negative `TimeRemaining`?
+                    let seconds = val.abs() as u64 * 60;
+                    Some(Duration::from_secs(seconds))
+                }
+            })
+    }
+
+    fn manufacturer(&self) -> Option<String> {
+        self.get_string(b"Manufacturer")
+    }
+
+    fn device_name(&self) -> Option<String> {
+        self.get_string(b"DeviceName")
+    }
+
+    fn serial_number(&self) -> Option<String> {
+        self.get_string(b"BatterySerialNumber")
+    }
 }
 
 impl Drop for PowerSource {

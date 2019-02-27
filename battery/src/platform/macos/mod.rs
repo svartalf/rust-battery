@@ -7,13 +7,14 @@ pub use self::device::IoKitDevice;
 
 mod iokit;
 mod device;
+mod traits;
 
 #[derive(Debug, Default)]
 pub struct IoKitManager;
 
 impl IoKitManager {
     pub fn iter(&self) -> IoKitIterator {
-        let inner = match device::IoKitDevice::new() {
+        let inner = match device::IoKitDevice::new::<iokit::PowerSource>() {
             Ok(device) => Some(device),
             Err(_) => None,
         };
@@ -24,7 +25,7 @@ impl IoKitManager {
 
 impl BatteryManager for IoKitManager {
     fn refresh(&mut self, battery: &mut Battery) -> io::Result<()> {
-        let inner = device::IoKitDevice::new()?;
+        let inner = device::IoKitDevice::new::<iokit::PowerSource>()?;
         *battery.get_mut_ref() = inner;
 
         Ok(())
@@ -46,3 +47,6 @@ impl iter::Iterator for IoKitIterator {
 }
 
 impl BatteryIterator for IoKitIterator {}
+
+#[cfg(test)]
+mod tests;

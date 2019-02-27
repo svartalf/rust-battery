@@ -105,7 +105,7 @@ impl BatteryDevice for PowerDevice {
     }
 
     fn percentage(&self) -> f32 {
-        set_bounds(100 * self.energy() / self.energy_full()) as f32
+        set_bounds(100 * (self.energy() / self.energy_full())) as f32
     }
 
     fn state(&self) -> State {

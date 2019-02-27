@@ -52,9 +52,7 @@ before_install:
     - cargo install --force cross
     - rustup component add clippy
 
-script:
-    - cross build --target=${TARGET} --release
-    - cross clippy --release -- -D warnings
+script: ci/script.sh
 
 notifications:
   email:

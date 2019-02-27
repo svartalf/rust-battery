@@ -11,7 +11,10 @@ pub trait BatteryIterator: Iterator<Item=Battery> + Sized {}
 
 pub trait BatteryDevice: Sized {
     fn capacity(&self) -> f32 {
-        ((self.energy_full() / self.energy_full_design()) * 100) as f32
+        let full = self.energy_full() as f32;
+        let full_design = self.energy_full_design() as f32;
+
+        (full / full_design) * 100.0
     }
 
     fn energy(&self) -> u32;

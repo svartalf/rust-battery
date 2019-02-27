@@ -31,7 +31,7 @@ use tui::layout::*;
 use tui::style::*;
 use tui::widgets::*;
 
-use battery::Battery;
+use battery::{Battery, State};
 
 use crate::ui::app::BatteryStats;
 use crate::ui::util::event::{Event, Events};
@@ -208,7 +208,7 @@ fn draw_common_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) w
     Table::new(header.iter(), rows)
         .header_style(Style::default().fg(Color::DarkGray))
         .block(block)
-        .widths(&[15, 20])
+        .widths(&[17, 17])
         .render(f, area);
 }
 
@@ -222,8 +222,13 @@ fn draw_energy_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) w
     let current = &format!("{:.2} Wh", battery.energy() as f32 / 1000.0);
     let last_full = &format!("{:.2} Wh", battery.energy_full() as f32 / 1000.0);
     let full_design = &format!("{:.2} Wh", battery.energy_full_design() as f32 / 1000.0);
+    let consumption_label = match battery.state() {
+        State::Charging => "Charging with",
+        State::Discharging => "Discharging with",
+        _ => "Consumption",
+    };
     let items = vec![
-        vec!["Consumption", consumption],
+        vec![consumption_label, consumption],
         vec!["Voltage", voltage],
         vec!["Capacity", capacity],
         vec!["Current", current],
@@ -239,7 +244,7 @@ fn draw_energy_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) w
     Table::new(header.iter(), rows)
         .header_style(Style::default().fg(Color::DarkGray))
         .block(block)
-        .widths(&[15, 20])
+        .widths(&[17, 17])
         .render(f, area);
 }
 
@@ -269,7 +274,7 @@ fn draw_time_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) whe
     Table::new(header.iter(), rows)
         .header_style(Style::default().fg(Color::DarkGray))
         .block(block)
-        .widths(&[15, 20])
+        .widths(&[17, 17])
         .render(f, area);
 }
 
@@ -293,6 +298,6 @@ fn draw_env_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) wher
     Table::new(header.iter(), rows)
         .header_style(Style::default().fg(Color::DarkGray))
         .block(block)
-        .widths(&[15, 20])
+        .widths(&[17, 17])
         .render(f, area);
 }
