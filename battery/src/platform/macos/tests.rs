@@ -1,9 +1,9 @@
-use std::io;
 use std::time::Duration;
 
 use crate::platform::traits::BatteryDevice;
 use super::device::IoKitDevice;
 use super::traits::DataSource;
+use super::iokit::Result;
 
 #[derive(Debug, Default)]
 struct TestDataSource {
@@ -20,8 +20,8 @@ struct TestDataSource {
 }
 
 impl DataSource for TestDataSource {
-    fn new() -> io::Result<Self> where Self: Sized {
-        Ok(Default::default())
+    fn refresh(&mut self) -> Result<()> {
+        Ok(())
     }
 
     fn fully_charged(&self) -> bool {

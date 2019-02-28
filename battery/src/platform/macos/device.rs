@@ -5,7 +5,6 @@
 //    - ChargingCurrent
 //    - NotChargingReason (?)
 
-use std::io;
 use std::str;
 use std::boxed::Box;
 use std::convert::AsRef;
@@ -17,7 +16,7 @@ use super::traits::DataSource;
 
 #[derive(Debug)]
 pub struct IoKitDevice {
-    source: Box<DataSource>,
+    source: Box<dyn DataSource>,
 
     manufacturer: Option<String>,
     model: Option<String>,
@@ -25,10 +24,8 @@ pub struct IoKitDevice {
 }
 
 impl IoKitDevice {
-    pub fn new<T: DataSource>() -> io::Result<IoKitDevice> {
-        let ds = T::new()?;
-
-        Ok(ds.into())
+    pub fn get_mut_ref(&mut self) -> &mut dyn DataSource {
+        &mut self.source
     }
 }
 
