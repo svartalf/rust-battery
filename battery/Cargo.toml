@@ -22,7 +22,7 @@ lazy-init = "0.3"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "0.2.48"
-mach = "0.1.2"
+mach = "0.2.3"
 core-foundation = "0.6.3"
 
 [target.'cfg(target_os = "windows")'.dependencies]
