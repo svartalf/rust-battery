@@ -20,6 +20,7 @@
 
 use std::io;
 use std::error::Error;
+use std::time::Duration;
 
 use termion::input::MouseTerminal;
 use termion::screen::AlternateScreen;
@@ -32,6 +33,13 @@ use tui::style::*;
 use tui::widgets::*;
 
 use battery::{Battery, State};
+use battery::units::Unit;
+use battery::units::power::watt;
+use battery::units::time::second;
+use battery::units::ratio::percent;
+use battery::units::energy::watt_hour;
+use battery::units::electric_potential::volt;
+use battery::units::thermodynamic_temperature::degree_celsius;
 
 use crate::ui::app::BatteryStats;
 use crate::ui::util::event::{Event, Events};
@@ -131,7 +139,7 @@ fn draw_tabs<B>(f: &mut Frame<B>, area: Rect, tabs: &TabsState) where B: Backend
 }
 
 fn draw_percentage_bar<B>(f: &mut Frame<B>, area: Rect, stat: &BatteryStats) where B: Backend {
-    let value = f64::from(stat.battery.percentage());
+    let value = f64::from(stat.battery.state_of_charge().get::<percent>());
     let block = Block::default()
         .title("Percentage")
         .borders(Borders::ALL);
@@ -216,12 +224,12 @@ fn draw_energy_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) w
     let block = Block::default()
         .borders(Borders::LEFT | Borders::RIGHT);
 
-    let consumption = &format!("{:.2} W", battery.energy_rate() as f32 / 1000.0);
-    let voltage = &format!("{:.2} V", battery.voltage() as f32 / 1000.0);
-    let capacity = &format!("{:.2}%", battery.capacity());
-    let current = &format!("{:.2} Wh", battery.energy() as f32 / 1000.0);
-    let last_full = &format!("{:.2} Wh", battery.energy_full() as f32 / 1000.0);
-    let full_design = &format!("{:.2} Wh", battery.energy_full_design() as f32 / 1000.0);
+    let consumption = &format!("{:.2} {}", battery.energy_rate().get::<watt>(), watt::abbreviation());
+    let voltage = &format!("{:.2} {}", battery.voltage().get::<volt>(), volt::abbreviation());
+    let capacity = &format!("{:.2} {}", battery.state_of_health().get::<percent>(), percent::abbreviation());
+    let current = &format!("{:.2} {}", battery.energy().get::<watt_hour>(), watt_hour::abbreviation());
+    let last_full = &format!("{:.2} {}", battery.energy_full().get::<watt_hour>(), watt_hour::abbreviation());
+    let full_design = &format!("{:.2} {}", battery.energy_full_design().get::<watt_hour>(), watt_hour::abbreviation());
     let consumption_label = match battery.state() {
         State::Charging => "Charging with",
         State::Discharging => "Discharging with",
@@ -253,12 +261,12 @@ fn draw_time_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) whe
         .borders(Borders::LEFT | Borders::RIGHT);
 
     let time_to_full = match battery.time_to_full() {
-        Some(time) => humantime::format_duration(time).to_string(),
+        Some(time) => humantime::format_duration(Duration::from_secs(time.get::<second>() as u64)).to_string(),
         None => "N/A".to_string(),
     };
 
     let time_to_empty = match battery.time_to_empty() {
-        Some(time) => humantime::format_duration(time).to_string(),
+        Some(time) => humantime::format_duration(Duration::from_secs(time.get::<second>() as u64)).to_string(),
         None => "N/A".to_string(),
     };
     let items = vec![
@@ -283,7 +291,7 @@ fn draw_env_information<B>(f: &mut Frame<B>, area: Rect, battery: &Battery) wher
         .borders(Borders::LEFT | Borders::RIGHT | Borders::BOTTOM);
 
     let temperature = match battery.temperature() {
-        Some(temp) => format!("{:.2} °C", temp),
+        Some(temp) => format!("{:.2} {}", temp.get::<degree_celsius>(), degree_celsius::abbreviation()),
         None => "N/A".to_string(),
     };
     let items = vec![

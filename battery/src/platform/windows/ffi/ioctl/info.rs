@@ -58,10 +58,12 @@ impl ops::DerefMut for BatteryInformation {
 }
 
 impl BatteryInformation {
+    #[inline]
     pub fn is_system_battery(&self) -> bool {
         (self.0.Capabilities & BATTERY_SYSTEM_BATTERY) != 0
     }
 
+    #[inline]
     pub fn is_relative(&self) -> bool {
         (self.0.Capabilities & BATTERY_CAPACITY_RELATIVE) != 0
     }
@@ -74,12 +76,14 @@ impl BatteryInformation {
         }
     }
 
-    // Originally `mWh`,matches `Battery::energy_full_design` result
+    // Originally `mWh`, matches `Battery::energy_full_design` result
+    #[inline]
     pub fn designed_capacity(&self) -> u32 {
         self.0.DesignedCapacity
     }
 
     // Originally `mWh`, matches `Battery::energy_full` result
+    #[inline]
     pub fn full_charged_capacity(&self) -> u32 {
         self.0.FullChargedCapacity
     }

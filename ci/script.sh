@@ -10,4 +10,4 @@ else
     cross test --target=${TARGET}
 fi
 
-cross clippy -- -D warnings
+cross clippy --target=${TARGET} -- -D warnings

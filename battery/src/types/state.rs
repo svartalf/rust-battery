@@ -1,6 +1,6 @@
+use std::fmt;
 use std::io;
 use std::str;
-use std::fmt;
 
 /// Possible battery state values.
 ///
@@ -13,6 +13,10 @@ pub enum State {
     Discharging,
     Empty,
     Full,
+
+    // Awaiting for https://github.com/rust-lang/rust/issues/44109
+    #[doc(hidden)]
+    __Nonexhaustive,
 }
 
 impl str::FromStr for State {
@@ -42,6 +46,7 @@ impl fmt::Display for State {
             State::Discharging => "discharging",
             State::Empty => "empty",
             State::Full => "full",
+            _ => "unknown",
         };
 
         write!(f, "{}", display)

@@ -1,10 +1,10 @@
 use std::io;
 use std::convert::AsRef;
 
+use crate::units::{ElectricPotential, ThermodynamicTemperature, Power, Energy};
 use crate::{State, Technology};
 use crate::platform::traits::BatteryDevice;
-use super::ffi::DeviceHandle;
-use super::ffi::BatteryQueryInformation;
+use super::ffi::{DeviceHandle, BatteryQueryInformation};
 
 #[derive(Debug)]
 pub struct PowerDevice {
@@ -13,12 +13,12 @@ pub struct PowerDevice {
 
     technology: Technology,
     state: State,
-    voltage: u32,
-    capacity: u32,
-    energy_rate: u32,
-    design_capacity: u32,
-    full_charged_capacity: u32,
-    temperature: Option<f32>,
+    voltage: ElectricPotential,
+    energy_rate: Power,
+    capacity: Energy,
+    design_capacity: Energy,
+    full_charged_capacity: Energy,
+    temperature: Option<ThermodynamicTemperature>,
     cycle_count: Option<u32>,
     device_name: Option<String>,
     manufacturer: Option<String>,
@@ -49,18 +49,19 @@ impl PowerDevice {
         };
         let rate = match status.rate() {
             None => return Err(io::Error::from(io::ErrorKind::InvalidData)),
-            Some(value) => value,
+            Some(value) => milliwatt!(value),
         };
         let capacity = match status.capacity() {
             None => return Err(io::Error::from(io::ErrorKind::InvalidData)),
-            Some(value) => value,
+            // TODO: Get rid of `* 0.001` when uom will have the milliwatt_hour type
+            Some(value) => milliwatt_hour!(value),
         };
         let voltage = match status.voltage() {
             None => return Err(io::Error::from(io::ErrorKind::InvalidData)),
-            Some(value) => value,
+            Some(value) => millivolt!(value),
         };
         let temperature = match handle.temperature() {
-            Ok(value) => Some(value),
+            Ok(value) => Some(decikelvin!(value)),
             Err(_) => None,
         };
 
@@ -69,8 +70,8 @@ impl PowerDevice {
             technology: info.technology(),
             state: status.state(),
             energy_rate: rate,
-            design_capacity: info.designed_capacity(),
-            full_charged_capacity: info.full_charged_capacity(),
+            design_capacity: milliwatt_hour!(info.designed_capacity()),
+            full_charged_capacity: milliwatt_hour!(info.full_charged_capacity()),
             cycle_count: info.cycle_count(),
             capacity,
             voltage,
@@ -88,35 +89,31 @@ impl PowerDevice {
 }
 
 impl BatteryDevice for PowerDevice {
-    fn energy(&self) -> u32 {
+    fn energy(&self) -> Energy {
         self.capacity
     }
 
-    fn energy_full(&self) -> u32 {
+    fn energy_full(&self) -> Energy {
         self.full_charged_capacity
     }
 
-    fn energy_full_design(&self) -> u32 {
+    fn energy_full_design(&self) -> Energy {
         self.design_capacity
     }
 
-    fn energy_rate(&self) -> u32 {
+    fn energy_rate(&self) -> Power {
         self.energy_rate
-    }
-
-    fn percentage(&self) -> f32 {
-        set_bounds(100 * (self.energy() / self.energy_full())) as f32
     }
 
     fn state(&self) -> State {
         self.state
     }
 
-    fn voltage(&self) -> u32 {
+    fn voltage(&self) -> ElectricPotential {
         self.voltage
     }
 
-    fn temperature(&self) -> Option<f32> {
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
         self.temperature
     }
 
@@ -138,14 +135,5 @@ impl BatteryDevice for PowerDevice {
 
     fn technology(&self) -> Technology {
         self.technology
-    }
-}
-
-#[inline]
-fn set_bounds(value: u32) -> u32 {
-    if value > 100 {
-        100
-    } else {
-        value
     }
 }

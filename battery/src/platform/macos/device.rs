@@ -8,8 +8,10 @@
 use std::str;
 use std::boxed::Box;
 use std::convert::AsRef;
-use std::time::Duration;
+use num_traits::identities::Zero;
 
+
+use crate::units::{ElectricPotential, ThermodynamicTemperature, Time, Power, Energy};
 use crate::types::{State, Technology};
 use crate::platform::traits::BatteryDevice;
 use super::traits::DataSource;
@@ -29,56 +31,38 @@ impl IoKitDevice {
     }
 }
 
-// Note about `mWh` values calculation, used in `energy`, `energy_full` and `energy_full_design`
-// method, which caused https://github.com/svartalf/rust-battery/issues/8 bug
-//
-// Formula: mWh = mAh * V
-//
-// But `self.source.voltage()` returns `mV`, not the `V` units.
 impl BatteryDevice for IoKitDevice {
-    fn energy(&self) -> u32 {
-        let voltage = self.source.voltage() as f32 / 1_000.0;  // V units
-
-        (self.source.current_capacity() as f32 * voltage) as u32
+    fn energy(&self) -> Energy {
+        self.source.current_capacity() * self.source.voltage()
     }
 
-    fn energy_full(&self) -> u32 {
-        let voltage = self.source.voltage() as f32 / 1_000.0;  // V units
-
-        (self.source.max_capacity() as f32 * voltage) as u32
+    fn energy_full(&self) -> Energy {
+        self.source.max_capacity() * self.source.voltage()
     }
 
-    fn energy_full_design(&self) -> u32 {
-        let voltage = self.source.voltage() as f32 / 1_000.0;  // V units
-
-        (self.source.design_capacity() as f32 * voltage) as u32
+    fn energy_full_design(&self) -> Energy {
+        self.source.design_capacity() * self.source.voltage()
     }
 
-    fn energy_rate(&self) -> u32 {
-        let voltage = self.source.voltage() as f32 / 1_000.0;  // V units
-
-        (self.source.amperage().abs() as f32 * voltage) as u32
-    }
-
-    fn percentage(&self) -> f32 {
-        100.0 * ((self.energy() as f32) / (self.energy_full() as f32))
+    fn energy_rate(&self) -> Power {
+        self.source.amperage() * self.source.voltage()
     }
 
     fn state(&self) -> State {
         match () {
             _ if !self.source.external_connected() => State::Discharging,
             _ if self.source.is_charging() => State::Charging,
-            _ if self.source.current_capacity() == 0 => State::Empty,
+            _ if self.source.current_capacity().is_zero() => State::Empty,
             _ if self.source.fully_charged() => State::Full,
             _ => State::Unknown,
         }
     }
 
-    fn voltage(&self) -> u32 {
+    fn voltage(&self) -> ElectricPotential {
         self.source.voltage()
     }
 
-    fn temperature(&self) -> Option<f32> {
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
         self.source.temperature()
     }
 
@@ -102,7 +86,7 @@ impl BatteryDevice for IoKitDevice {
         self.source.cycle_count()
     }
 
-    fn time_to_full(&self) -> Option<Duration> {
+    fn time_to_full(&self) -> Option<Time> {
         if self.state() == State::Charging {
             self.source.time_remaining()
         } else {
@@ -110,7 +94,7 @@ impl BatteryDevice for IoKitDevice {
         }
     }
 
-    fn time_to_empty(&self) -> Option<Duration> {
+    fn time_to_empty(&self) -> Option<Time> {
         if self.state() == State::Discharging {
             self.source.time_remaining()
         } else {

@@ -19,7 +19,7 @@ use crate::{Batteries, Battery};
 /// If there is no batteries left to iterate, this function returns `NULL`,
 /// otherwise it returns pointer to next battery.
 #[no_mangle]
-pub unsafe extern fn battery_iterator_next(ptr: *mut Batteries) -> *mut Battery {
+pub unsafe extern "C" fn battery_iterator_next(ptr: *mut Batteries) -> *mut Battery {
     assert!(!ptr.is_null());
     let iterator = &mut *ptr;
 
@@ -31,7 +31,7 @@ pub unsafe extern fn battery_iterator_next(ptr: *mut Batteries) -> *mut Battery 
 
 /// Frees previously created batteries iterator.
 #[no_mangle]
-pub unsafe extern fn battery_iterator_free(ptr: *mut Batteries) {
+pub unsafe extern "C" fn battery_iterator_free(ptr: *mut Batteries) {
     if ptr.is_null() {
         return;
     }

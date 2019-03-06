@@ -112,16 +112,11 @@ impl BatteryStatus {
         }
     }
 
-    pub fn rate(&self) -> Option<u32> {
+    pub fn rate(&self) -> Option<i32> {
         if self.0.Rate == BATTERY_UNKNOWN_RATE {
             None
         } else {
-            let value = self.0.Rate;
-            if value.is_negative() {
-                Some((-value) as u32)
-            } else {
-                Some(value as u32)
-            }
+            Some(self.0.Rate.abs())
         }
     }
 }

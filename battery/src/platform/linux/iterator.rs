@@ -6,6 +6,7 @@ use std::path::Path;
 use crate::Battery;
 use crate::platform::traits::BatteryIterator;
 use super::SysFsDevice;
+use super::sysfs;
 
 #[derive(Debug)]
 pub struct SysFsIterator {
@@ -36,8 +37,10 @@ impl iter::Iterator for SysFsIterator {
                 Some(Err(_)) => continue, // Unable to access the sysfs somehow // TODO: trace!()
                 Some(Ok(entry)) => {
                     let path = entry.path();
-                    match fs::read_to_string(path.join("type")) {
-                        Ok(ref content) if content == "Battery\n" => {
+                    let type_ = fs::read_to_string(path.join("type"));
+                    let scope = sysfs::scope(path.join("scope"));
+                    match type_ {
+                        Ok(ref content) if content == "Battery\n" && scope == sysfs::Scope::System => {
                             let inner = SysFsDevice::new(path);
 
                             return Some(Battery::from(inner));

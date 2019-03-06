@@ -1,4 +1,5 @@
-#[macro_use] extern crate cfg_if;
+#[macro_use]
+extern crate cfg_if;
 
 cfg_if! {
     if #[cfg(windows)] {

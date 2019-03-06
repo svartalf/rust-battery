@@ -1,6 +1,5 @@
 use std::i32;
 use std::fmt;
-use std::time::Duration;
 
 use core_foundation::base::{CFType, TCFType};
 use core_foundation::dictionary::CFDictionary;
@@ -8,6 +7,7 @@ use core_foundation::string::{CFString, CFStringGetTypeID};
 use core_foundation::boolean::{CFBoolean, CFBooleanGetTypeID};
 use core_foundation::number::{CFNumber, CFNumberGetTypeID};
 
+use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
 use super::{IoObject, Result};
 use super::super::traits::DataSource;
 
@@ -114,49 +114,58 @@ impl DataSource for PowerSource {
             .expect("IOKit is not providing required data")
     }
 
-    fn voltage(&self) -> u32 {
-        self.get_u32(VOLTAGE_KEY)
-            .expect("IOKit is not providing required data")
+    // mV
+    fn voltage(&self) -> ElectricPotential {
+        let value = self.get_u32(VOLTAGE_KEY)
+            .expect("IOKit is not providing required data");
+        millivolt!(value)
     }
 
-    fn amperage(&self) -> i32 {
-        self.get_i32(AMPERAGE_KEY)
-            .expect("IOKit is not providing required data")
+    // mA
+    fn amperage(&self) -> ElectricCurrent {
+        let value = self.get_i32(AMPERAGE_KEY)
+            .expect("IOKit is not providing required data");
+        milliampere!(value.abs())
     }
 
-    fn design_capacity(&self) -> u32 {
-        self.get_u32(DESIGN_CAPACITY_KEY)
-            .expect("IOKit is not providing required data")
+    // mAh
+    fn design_capacity(&self) -> ElectricCharge {
+        let value = self.get_u32(DESIGN_CAPACITY_KEY)
+            .expect("IOKit is not providing required data");
+        milliampere_hour!(value)
     }
 
-    fn max_capacity(&self) -> u32 {
-        self.get_u32(MAX_CAPACITY_KEY)
-            .expect("IOKit is not providing required data")
+    // mAh
+    fn max_capacity(&self) -> ElectricCharge {
+        let value = self.get_u32(MAX_CAPACITY_KEY)
+            .expect("IOKit is not providing required data");
+        milliampere_hour!(value)
     }
 
-    fn current_capacity(&self) -> u32 {
-        self.get_u32(CURRENT_CAPACITY_KEY)
-            .expect("IOKit is not providing required data")
+    // mAh
+    fn current_capacity(&self) -> ElectricCharge {
+        let value = self.get_u32(CURRENT_CAPACITY_KEY)
+            .expect("IOKit is not providing required data");
+        milliampere_hour!(value)
     }
 
-    fn temperature(&self) -> Option<f32> {
+    // milliCelsius :)
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
         self.get_i32(TEMPERATURE_KEY)
-            .map(|value| value as f32 / 100.0)
+            .map(|value| celsius!(value as f32 / 100.0))
     }
 
     fn cycle_count(&self) -> Option<u32> {
         self.get_u32(CYCLE_COUNT_KEY)
     }
 
-    fn time_remaining(&self) -> Option<Duration> {
+    fn time_remaining(&self) -> Option<Time> {
         self.get_i32(TIME_REMAINING_KEY)
             .and_then(|val| {
                 if val == i32::MAX {
                     None
                 } else {
-                    // TODO: Is it possible to have negative `TimeRemaining`?
-                    let seconds = val.abs() as u64 * 60;
-                    Some(Duration::from_secs(seconds))
+                    Some(minute!(val))
                 }
             })
     }
@@ -176,7 +185,7 @@ impl DataSource for PowerSource {
 
 impl From<IoObject> for PowerSource {
     fn from(io_obj: IoObject) -> PowerSource {
-        let props = io_obj.properties().expect("Unable to fetch properties for I/OKit IOObject");
+        let props = io_obj.properties().expect("Unable to fetch properties for IOKit IOObject");
 
         PowerSource {
             object: io_obj,

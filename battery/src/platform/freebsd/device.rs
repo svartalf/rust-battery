@@ -4,6 +4,7 @@ use std::fs::OpenOptions;
 
 use crate::{State, Technology};
 use crate::platform::traits::BatteryDevice;
+use crate::units::{Energy, Power, ElectricPotential, ThermodynamicTemperature};
 use super::acpi;
 
 #[derive(Debug)]
@@ -11,12 +12,12 @@ pub struct IoCtlDevice {
     state: State,
     technology: Technology,
 
-    energy_rate: u32,
-    voltage: u32,
+    energy_rate: Power,
+    voltage: ElectricPotential,
 
-    design_capacity: u32,
-    max_capacity: u32,
-    current_capacity: u32,
+    design_capacity: Energy,
+    max_capacity: Energy,
+    current_capacity: Energy,
 
     manufacturer: Option<String>,
     model: Option<String>,
@@ -33,61 +34,72 @@ impl IoCtlDevice {
         let bif = inner.bif()?;
         let bst = inner.bst()?;
 
-        let voltage = bst.voltage();
-        let mut device = IoCtlDevice {
-            state: bst.state(),
-            technology: bif.technology(),
-            energy_rate: bst.rate(),
-            voltage: voltage,
-            design_capacity: bif.design_capacity(),
-            max_capacity: bif.last_full_capacity(),
-            current_capacity: bst.capacity(),
+        let voltage = millivolt!(bst.voltage());
+
+        // FreeBSD returns battery info (bif) either in mA or mV, and we need the mW.
+        // mA values are multiplied by `bif.dvol`,
+        // as in `sys/dev/acpica/acpi_battery.c:acpi_battery_get_battinfo` function
+        let design_voltage = millivolt!(bif.design_voltage());
+        let energy_rate = match bif.units() {
+            acpi::Units::MilliWatts => milliwatt!(bst.rate()),
+            acpi::Units::MilliAmperes => milliampere!(bst.rate()) * design_voltage,
+        };
+        let current_capacity = match bif.units() {
+            acpi::Units::MilliWatts => milliwatt_hour!(bst.capacity()),
+            acpi::Units::MilliAmperes => milliampere_hour!(bst.capacity()) * design_voltage,
+        };
+        let design_capacity = match bif.units() {
+            acpi::Units::MilliWatts => milliwatt_hour!(bif.design_capacity()),
+            acpi::Units::MilliAmperes => milliampere_hour!(bif.design_capacity()) * design_voltage,
+        };
+        let max_capacity = match bif.units() {
+            acpi::Units::MilliWatts => milliwatt_hour!(bif.last_full_capacity()),
+            acpi::Units::MilliAmperes => milliampere_hour!(bif.last_full_capacity()) * design_voltage,
+        };
+
+        let device = IoCtlDevice {
             manufacturer: bif.oem(),
             model: bif.model(),
             serial_number: bif.serial(),
+            state: bst.state(),
+            technology: bif.technology(),
+            energy_rate,
+            voltage,
+            design_capacity,
+            max_capacity,
+            current_capacity,
         };
-
-        if bif.units() == acpi::Units::mA {
-            device.energy_rate *= voltage;
-            device.current_capacity *= voltage;
-            device.design_capacity *= voltage;
-            device.max_capacity *= voltage;
-        }
 
         Ok(device)
     }
 }
 
 impl BatteryDevice for IoCtlDevice {
-    fn energy(&self) -> u32 {
+    fn energy(&self) -> Energy {
         self.current_capacity
     }
 
-    fn energy_full(&self) -> u32 {
+    fn energy_full(&self) -> Energy {
         self.max_capacity
     }
 
-    fn energy_full_design(&self) -> u32 {
+    fn energy_full_design(&self) -> Energy {
         self.design_capacity
     }
 
-    fn energy_rate(&self) -> u32 {
+    fn energy_rate(&self) -> Power {
         self.energy_rate
-    }
-
-    fn percentage(&self) -> f32 {
-        (100 * self.energy() / self.energy_full()) as f32
     }
 
     fn state(&self) -> State {
         self.state
     }
 
-    fn voltage(&self) -> u32 {
+    fn voltage(&self) -> ElectricPotential {
         self.voltage
     }
 
-    fn temperature(&self) -> Option<f32> {
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
         None
     }
 

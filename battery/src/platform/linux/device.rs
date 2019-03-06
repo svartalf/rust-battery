@@ -1,35 +1,32 @@
 use std::io;
+use std::f32;
 use std::convert::AsRef;
 use std::str::FromStr;
 use std::path::PathBuf;
 use std::default::Default;
 
 use lazy_init::Lazy;
+use num_traits::identities::Zero;
 
 use crate::{State, Technology};
-use crate::platform::traits::BatteryDevice;
+use crate::units::{Energy, Power, ElectricPotential, ElectricCharge, Ratio, ThermodynamicTemperature};
+use crate::units::power::{watt, microwatt};
+use crate::platform::traits::{BatteryDevice, Bound};
 use super::sysfs;
-
-const DESIGN_VOLTAGE_PROBES: [&str; 4] = [
-    "voltage_max_design",
-    "voltage_min_design",
-    "voltage_present",
-    "voltage_now",
-];
 
 #[derive(Default)]
 pub struct Inner {
     root: PathBuf,
 
-    design_voltage: Lazy<u32>,
-    energy: Lazy<u32>,
-    energy_full: Lazy<u32>,
-    energy_full_design: Lazy<u32>,
-    energy_rate: Lazy<u32>,
-    voltage: Lazy<u32>,  // mV
-    percentage: Lazy<f32>, // 0.0 .. 100.0
+    design_voltage: Lazy<ElectricPotential>,
+    energy: Lazy<Energy>,
+    energy_full: Lazy<Energy>,
+    energy_full_design: Lazy<Energy>,
+    energy_rate: Lazy<Power>,
+    voltage: Lazy<ElectricPotential>,
+    state_of_charge: Lazy<Ratio>,
 
-    temperature: Lazy<Option<f32>>,
+    temperature: Lazy<Option<ThermodynamicTemperature>>,
     cycle_count: Lazy<Option<u32>>,
 
     state: Lazy<State>,
@@ -67,7 +64,7 @@ impl Inner {
         let _ = self.energy_full_design();
         let _ = self.energy_rate();
         let _ = self.voltage();
-        let _ = self.percentage();
+        let _ = self.state_of_charge();
         let _ = self.temperature();
         let _ = self.state();
         let _ = self.technology();
@@ -77,168 +74,154 @@ impl Inner {
         let _ = self.cycle_count();
     }
 
-    fn design_voltage(&self) -> u32 {
+    fn design_voltage(&self) -> ElectricPotential {
         *self.design_voltage.get_or_create(|| {
-            DESIGN_VOLTAGE_PROBES.iter()
-            .filter_map(|filename| {
-                match sysfs::get_u32(self.root.join(filename)) {
-                    Ok(value) if value > 1 => Some(value / 1_000_000),
-                    _ => None,
-                }
-            })
-            .next()
-            // Same to `upower`, using 10V as an approximation
-            .unwrap_or(10)
+            ["voltage_max_design", "voltage_min_design", "voltage_present", "voltage_now"].iter()
+                .filter_map(|filename| sysfs::voltage(self.root.join(filename)))
+                .next()
+                // Same to `upower`, using 10V as an approximation
+                .unwrap_or_else(|| volt!(10.0))
         })
     }
 
-    fn charge_full(&self) -> u32 {
-        ["charge_full", "charge_full_design"].iter() // µAh
-            .filter_map(|filename| {
-                match sysfs::get_u32(self.root.join(filename)) {
-                    Ok(value) => Some(value / 1_000),
-                    _ => None,
-                }
-            })
+    fn energy_now(&self) -> Option<Energy> {
+        ["energy_now", "energy_avg"].iter()
+            .filter_map(|filename| sysfs::energy(self.root.join(filename)))
             .next()
-            .unwrap_or(0)
+    }
+
+    fn charge_now(&self) -> Option<ElectricCharge> {
+        ["charge_now", "charge_avg"].iter()
+            .filter_map(|filename| sysfs::charge(self.root.join(filename)))
+            .next()
+    }
+
+    fn charge_full(&self) -> ElectricCharge {
+        ["charge_full", "charge_full_design"].iter()
+            .filter_map(|filename| sysfs::charge(self.root.join(filename)))
+            .next()
+            .unwrap_or_else(|| microampere_hour!(0.0))
     }
 
 }
 
 impl BatteryDevice for Inner {
-    fn capacity(&self) -> f32 {
+    fn state_of_health(&self) -> Ratio {
         let energy_full = self.energy_full();
-        if energy_full > 0 {
-            let capacity = (energy_full as f32 / self.energy_full_design() as f32) * 100.0;
-            set_bounds(capacity)
+        if !energy_full.is_zero() {
+            (energy_full / self.energy_full_design()).into_bounded()
         } else {
-            100.0
+            percent!(100.0)
         }
     }
 
-    fn energy(&self) -> u32 {
+    fn energy(&self) -> Energy {
         *self.energy.get_or_create(|| {
-            let mut value = ["energy_now", "energy_avg"].iter()
-                .filter_map(|filename| {
-                    match sysfs::get_u32(self.root.join(filename)) {
-                        Ok(energy) => Some(energy / 1_000),
-                        Err(_) => None,
+            self.energy_now()
+                .or_else(|| match self.charge_now() {
+                    Some(charge) => Some(charge * self.design_voltage()),
+                    None => None,
+                })
+                .unwrap_or_else(|| self.energy_full() * self.state_of_charge())
+        })
+    }
+
+    fn energy_full(&self) -> Energy {
+        *self.energy_full.get_or_create(|| {
+            sysfs::energy(self.root.join("energy_full"))
+                .or_else(|| {
+                    match sysfs::charge(self.root.join("charge_full")) {
+                        Some(charge) => Some(charge * self.design_voltage()),
+                        None => None
                     }
                 })
-                .next();
-
-            if value.is_none() {
-                value = ["charge_now", "charge_avg"].iter()
-                    .filter_map(|filename| {
-                        match sysfs::get_u32(self.root.join(filename)) {
-                            Ok(charge) => Some(charge / 1_000 * self.design_voltage()),
-                            Err(_) => None,
-                        }
-                    })
-                    .next();
-            }
-
-            match value {
-                None => self.energy_full() * self.percentage() as u32 / 100,
-                Some(energy) => energy,
-            }
+                .unwrap_or_else(|| self.energy_full_design())
         })
     }
 
-    fn energy_full(&self) -> u32 {
-        *self.energy_full.get_or_create(|| {
-            let res = match sysfs::get_u32(self.root.join("energy_full")) {
-                Ok(energy) => energy / 1_000,
-                Err(_) => match sysfs::get_u32(self.root.join("charge_full")) {
-                    Ok(charge) => charge / 1_000 * self.design_voltage(),
-                    Err(_) => 0,
-                }
-            };
-
-            if res == 0 {
-                self.energy_full_design()
-            } else {
-                res
-            }
-        })
-
-    }
-
-    fn energy_full_design(&self) -> u32 {
+    fn energy_full_design(&self) -> Energy {
         *self.energy_full_design.get_or_create(|| {
-            match sysfs::get_u32(self.root.join("energy_full_design")) {
-                Ok(energy) => energy / 1_000,
-                Err(_) => match sysfs::get_u32(self.root.join("charge_full_design")) {
-                    Ok(charge) => charge / 1_000 * self.design_voltage(),
-                    Err(_) => 0,
-                }
-            }
-        })
-    }
-
-    fn energy_rate(&self) -> u32 {
-        *self.energy_rate.get_or_create(|| {
-            let mut value = match sysfs::get_u32(self.root.join("power_now")) {
-                Ok(power) if power > 10_000 => power / 1_000,
-                _ => {
-                    match sysfs::get_u32(self.root.join("current_now")) {
-                        Ok(current_now) => {
-                            // If charge_full exists, then current_now is always reported in uA.
-                            // In the legacy case, where energy only units exist, and power_now isn't present
-                            // current_now is power in uW.
-                            // Source: upower
-                            let mut current = current_now / 1_000;
-                            if self.charge_full() != 0 {
-                                current *= self.design_voltage();
-                            }
-                            current
-                        },
-                        Err(_) => {
-                            0u32
-                        },
+            sysfs::energy(self.root.join("energy_full_design"))
+                .or_else(|| {
+                    match sysfs::charge(self.root.join("charge_full_design")) {
+                        Some(charge) => Some(charge * self.design_voltage()),
+                        None => None
                     }
-                }
-            };
-
-            // ACPI gives out the special 'Ones' value for rate when it's unable
-            // to calculate the true rate. We should set the rate zero, and wait
-            // for the BIOS to stabilise.
-            // Source: upower
-            // TODO: Uncomment and fix
-            // if value == 0xffff {
-            //    value = 0.0;
-            // }
-
-            // Sanity check, same as upower does, if power is greater than 100W
-            if value > 100_000 {
-                value = 0;
-            }
-
-            // TODO: Calculate energy_rate manually, if hardware fails.
-            // if value < 0.01 {
-            //    // Check upower `up_device_supply_calculate_rate` function
-            // }
-
-            // Some batteries give out massive rate values when nearly empty
-             if value < 10 {
-                 value = 0;
-             }
-
-            value
+                })
+                // Seems to be an impossible case
+                .unwrap_or_else(|| microwatt_hour!(0.0))
         })
     }
 
-    // 0.0..100.0
-    fn percentage(&self) -> f32 {
-        *self.percentage.get_or_create(|| {
-            let capacity= match sysfs::get_u32(self.root.join("capacity")) {
-                Ok(capacity) => capacity,
-                _ if self.energy_full() > 0 => 100 * self.energy() / self.energy_full(),
-                Err(_) => 0,
-            };
+    fn energy_rate(&self) -> Power {
+        *self.energy_rate.get_or_create(|| {
+            sysfs::power(self.root.join("power_now"))
+                .or_else(|| {
+                    match sysfs::get_f32(self.root.join("current_now")) {
+                        Ok(current_now) => {
+                            // If charge_full exists, then current_now is always reported in µA.
+                            // In the legacy case, where energy only units exist, and power_now isn't present
+                            // current_now is power in µW.
+                            // Source: upower
+                            if !self.charge_full().is_zero() {
+                                // µA then
+                                Some(microampere!(current_now) * self.design_voltage())
+                            } else {
+                                // µW :|
+                                Some(microwatt!(current_now))
+                            }
+                        },
+                        _ => None,
+                    }
+                })
+                // Sanity check if power is greater than 100W (upower)
+                .map(|power| {
+                    if power.get::<watt>() > 100.0 {
+                        watt!(0.0)
+                    } else {
+                        power
+                    }
+                })
+                // Some batteries give out massive rate values when nearly empty (upower)
+                .map(|power| {
+                    if power.get::<microwatt>() < 10.0 {
+                        watt!(0.0)
+                    } else {
+                        power
+                    }
+                })
+                // ACPI gives out the special 'Ones' (Constant Ones Object) value for rate
+                // when it's unable to calculate the true rate. We should set the rate zero,
+                // and wait for the BIOS to stabilise.
+                // Source: upower
+                //
+                // It come as an `0xffff` originally, but we are operating with `Power` now,
+                // so this `Ones` value is recalculated a little.
+                .map(|power| {
+                    // TODO: There might be a chance that we had lost a precision during the conversion
+                    // from the microwatts into default watts, so this should be fixed
+                    if (power.get::<watt>() - 65535.0).abs() < f32::EPSILON {
+                        watt!(0.0)
+                    } else {
+                        power
+                    }
+                })
+                .unwrap_or_else(|| microwatt!(0.0))
 
-            set_bounds(capacity as f32)
+                // TODO: Calculate energy_rate manually, if hardware fails.
+                // if value < 0.01 {
+                //    // Check upower `up_device_supply_calculate_rate` function
+                // }
+        })
+    }
+
+    fn state_of_charge(&self) -> Ratio {
+        *self.state_of_charge.get_or_create(|| {
+            match sysfs::get_f32(self.root.join("capacity")) {
+                Ok(capacity) => percent!(capacity).into_bounded(),
+                _ if self.energy_full().is_sign_positive() => self.energy() / self.energy_full(),
+                Err(_) => percent!(0.0),
+            }
         })
     }
 
@@ -250,27 +233,22 @@ impl BatteryDevice for Inner {
         })
     }
 
-    // mV
-    fn voltage(&self) -> u32 {
+    fn voltage(&self) -> ElectricPotential {
         *self.voltage.get_or_create(|| {
-            ["voltage_now", "voltage_avg"].iter()
-                .filter_map(|filename| {
-                    match sysfs::get_u32(self.root.join(filename)) {
-                        Ok(voltage) if voltage > 1 => Some(voltage / 1_000),
-                        _ => None,
-                    }
-                })
+            ["voltage_now", "voltage_avg"].iter()  // µV
+                .filter_map(|filename| sysfs::voltage(self.root.join(filename)))
                 .next()
-                .unwrap_or(0) // TODO: Check if it is really unreachable
+                .unwrap_or_else(|| microvolt!(0.0))
         })
     }
 
-    fn temperature(&self) -> Option<f32> {
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
         *self.temperature.get_or_create(|| {
             let res = sysfs::get_f32(self.root.join("temp"))
                 .and_then(|temp| Ok(temp / 10.0));
+            // TODO: Use .transmute() when it is stable
             match res {
-                Ok(value) => Some(value),
+                Ok(value) => Some(celsius!(value)),
                 Err(_) => None,
             }
         })
@@ -338,39 +316,39 @@ impl SysFsDevice {
 }
 
 impl BatteryDevice for SysFsDevice {
-    fn capacity(&self) -> f32 {
-        self.0.capacity()
+    fn state_of_health(&self) -> Ratio {
+        self.0.state_of_health()
     }
 
-    fn energy(&self) -> u32 {
+    fn energy(&self) -> Energy {
         self.0.energy()
     }
 
-    fn energy_full(&self) -> u32 {
+    fn energy_full(&self) -> Energy {
         self.0.energy_full()
     }
 
-    fn energy_full_design(&self) -> u32 {
+    fn energy_full_design(&self) -> Energy {
         self.0.energy_full_design()
     }
 
-    fn energy_rate(&self) -> u32 {
+    fn energy_rate(&self) -> Power {
         self.0.energy_rate()
     }
 
-    fn percentage(&self) -> f32 {
-        self.0.percentage()
+    fn state_of_charge(&self) -> Ratio {
+        self.0.state_of_charge()
     }
 
     fn state(&self) -> State {
         self.0.state()
     }
 
-    fn voltage(&self) -> u32 {
+    fn voltage(&self) -> ElectricPotential {
         self.0.voltage()
     }
 
-    fn temperature(&self) -> Option<f32> {
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
         self.0.temperature()
     }
 
@@ -393,16 +371,4 @@ impl BatteryDevice for SysFsDevice {
     fn cycle_count(&self) -> Option<u32> {
         self.0.cycle_count()
     }
-}
-
-#[inline]
-fn set_bounds(value: f32) -> f32 {
-    if value < 0.0 {
-        return 0.0;
-    }
-    if value > 100.0 {
-        return 100.0;
-    }
-
-    value
 }

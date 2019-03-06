@@ -36,9 +36,9 @@
 // from the battery crate, if this line is missing
 extern crate battery as battery_lib;
 
-mod manager;
-mod iterator;
 mod battery;
+mod iterator;
+mod manager;
 mod state;
 mod technology;
 
@@ -60,8 +60,8 @@ pub type Batteries = battery_lib::Batteries;
 /// and work with it only via library methods.
 pub type Battery = battery_lib::Battery;
 
-pub use self::manager::*;
-pub use self::iterator::*;
 pub use self::battery::*;
+pub use self::iterator::*;
+pub use self::manager::*;
 pub use self::state::*;
 pub use self::technology::*;

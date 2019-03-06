@@ -83,27 +83,27 @@ lib.battery_get_serial_number.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_serial_number.restype = ctypes.c_char_p
 lib.battery_get_state.restype = ctypes.c_uint8
 lib.battery_get_energy.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_energy.restype = ctypes.c_uint32
+lib.battery_get_energy.restype = ctypes.c_float
 lib.battery_get_energy_full.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_energy_full.restype = ctypes.c_uint32
+lib.battery_get_energy_full.restype = ctypes.c_float
 lib.battery_get_energy_full_design.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_energy_full_design.restype = ctypes.c_uint32
+lib.battery_get_energy_full_design.restype = ctypes.c_float
 lib.battery_get_energy_rate.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_energy_rate.restype = ctypes.c_uint32
+lib.battery_get_energy_rate.restype = ctypes.c_float
 lib.battery_get_voltage.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_voltage.restype = ctypes.c_uint32
+lib.battery_get_voltage.restype = ctypes.c_float
 lib.battery_get_technology.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_technology.restype = ctypes.c_uint8
 lib.battery_get_time_to_full.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_time_to_full.restype = ctypes.c_uint64
+lib.battery_get_time_to_full.restype = ctypes.c_float
 lib.battery_get_time_to_empty.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_time_to_empty.restype = ctypes.c_uint64
-lib.battery_get_percentage.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_percentage.restype = ctypes.c_float
+lib.battery_get_time_to_empty.restype = ctypes.c_float
+lib.battery_get_state_of_charge.argtypes = (ctypes.POINTER(Battery), )
+lib.battery_get_state_of_charge.restype = ctypes.c_float
 lib.battery_get_temperature.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_temperature.restype = ctypes.c_float
-lib.battery_get_capacity.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_capacity.restype = ctypes.c_float
+lib.battery_get_state_of_health.argtypes = (ctypes.POINTER(Battery), )
+lib.battery_get_state_of_health.restype = ctypes.c_float
 lib.battery_get_cycle_count.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_cycle_count.restype = ctypes.c_uint32
 
@@ -120,16 +120,16 @@ if __name__ == '__main__':
         print('S/N', lib.battery_get_serial_number(battery))
         print('State', STATE.get(lib.battery_get_state(battery)))
         print('Technology', TECHNOLOGY.get(lib.battery_get_technology(battery)))
-        print('Energy (Wh)', lib.battery_get_energy(battery) / 1000)
-        print('Energy full (Wh)', lib.battery_get_energy_full_design(battery) / 1000)
-        print('Energy full design (Wh)', lib.battery_get_energy_full_design(battery) / 1000)
-        print('Energy rate (W)', lib.battery_get_energy_rate(battery) / 1000)
-        print('Voltage (V)', lib.battery_get_voltage(battery) / 1000)
+        print('Energy (joule)', lib.battery_get_energy(battery))
+        print('Energy full (joule)', lib.battery_get_energy_full_design(battery))
+        print('Energy full design (joule)', lib.battery_get_energy_full_design(battery))
+        print('Energy rate (W)', lib.battery_get_energy_rate(battery))
+        print('Voltage (V)', lib.battery_get_voltage(battery))
         print('Time to full (sec)', lib.battery_get_time_to_full(battery))
         print('Time to empty (sec)', lib.battery_get_time_to_empty(battery))
-        print('Percentage (%)', lib.battery_get_percentage(battery))
-        print('Temperature (C)', lib.battery_get_temperature(battery))
-        print('Capacity (%)', lib.battery_get_capacity(battery))
+        print('State of charge (%)', lib.battery_get_state_of_charge(battery))
+        print('Temperature (K)', lib.battery_get_temperature(battery))
+        print('State of health (%)', lib.battery_get_state_of_health(battery))
         print('Cycle count', lib.battery_get_cycle_count(battery))
 
         lib.battery_free(battery)

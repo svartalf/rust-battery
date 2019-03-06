@@ -13,7 +13,18 @@ use nix::Error;
 use crate::{State, Technology};
 
 const ACPI_CMBAT_MAXSTRLEN: usize = 32;
+
+// This one const is not defined in FreeBSD sources,
+// but we are defining it for consistency.
+const ACPI_BATT_STAT_FULL: u32 = 0x0000;
+// Declared at `sys/dev/acpica/acpiio.h`
+const ACPI_BATT_STAT_DISCHARG: u32 = 0x0001;
+const ACPI_BATT_STAT_CHARGING: u32 = 0x0002;
+const ACPI_BATT_STAT_CRITICAL: u32 = 0x0004;
+
+/// FOr `AcpiBif` struct capacity is in mWh, rate in mW.
 const ACPI_BIF_UNITS_MW: u32 = 0;
+/// For `AcpiBif` struct capacity is in mAh, rate in mA.
 const ACPI_BIF_UNITS_MA: u32 = 1;
 
 fn map_nix_err(e: Error) -> io::Error {
@@ -23,11 +34,10 @@ fn map_nix_err(e: Error) -> io::Error {
     }
 }
 
-#[allow(non_camel_case_types)] // it would be stupid to call it `Mw`, right? Looks like megawatt
 #[derive(Debug, Eq, PartialEq)]
 pub enum Units {
-    mW,
-    mA,
+    MilliWatts,
+    MilliAmperes,
 }
 
 #[repr(C)]
@@ -51,9 +61,9 @@ pub struct AcpiBif {
 impl AcpiBif {
     pub fn units(&self) -> Units {
         match self.units {
-            ACPI_BIF_UNITS_MW => Units::mW,
-            ACPI_BIF_UNITS_MA => Units::mA,
-            _ => panic!("Unknown units from acpi_bif"),
+            ACPI_BIF_UNITS_MW => Units::MilliWatts,
+            ACPI_BIF_UNITS_MA => Units::MilliAmperes,
+            _ => unreachable!("Unknown units from acpi_bif"),
         }
     }
 
@@ -79,16 +89,24 @@ impl AcpiBif {
         }
     }
 
+    /// mV always
+    #[inline]
+    pub fn design_voltage(&self) -> u32 {
+        self.dvol
+    }
+
     pub fn oem(&self) -> Option<String> {
         self.get_string(&self.oeminfo)
     }
 
-    // energy_design
+    /// Either mWh or mAh, depends on `self.units`
+    #[inline]
     pub fn design_capacity(&self) -> u32 {
         self.dcap
     }
 
-    // energy_full_design
+    /// Either mWh or mAh, depends on `self.units`
+    #[inline]
     pub fn last_full_capacity(&self) -> u32 {
         self.lfcap
     }
@@ -117,24 +135,33 @@ pub struct AcpiBst {
 
 impl AcpiBst {
     // based on `ACPI_BATT_STAT_*` defines
+    #[inline]
     pub fn state(&self) -> State {
         match self.state {
-            0x0000 => State::Full,
-            0x0001 => State::Discharging,
-            0x0002 => State::Charging,
-            0x0004 => State::Charging,
+            ACPI_BATT_STAT_FULL => State::Full,
+            value if value & ACPI_BATT_STAT_DISCHARG != 0 => State::Discharging,
+            value if value & ACPI_BATT_STAT_CHARGING != 0 => State::Charging,
+            // This is probably a wrong state, because battery might be in critical state,
+            // but charging at the moment. Might worth to investigate if it is possible
+            // to implement `State::Critical` for all supported platforms.
+            // In fact, right now this match arm is unreachable in most cases,
+            // because previous arms will match first, but it would be harder to forget about it
+            value if value & ACPI_BATT_STAT_CRITICAL != 0 => State::Discharging,
             _ => State::Unknown
         }
     }
 
+    #[inline]
     pub fn rate(&self) -> u32 {
         self.rate
     }
 
+    #[inline]
     pub fn capacity(&self) -> u32 {
         self.cap
     }
 
+    #[inline]
     pub fn voltage(&self) -> u32 {
         self.volt
     }

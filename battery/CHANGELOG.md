@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Changed
+- Return SI measurement units from `uom` crate for almost all public `Battery` methods
+- Re-export used `uom` quantities and measurement units in public `battery::units` module
+- Rename `Battery::percentage` method into `Battery::state_of_charge`
+- Rename `Battery::capacity` method into `Battery::state_of_health`
+- Mark `battery::State` and `battery::Technology` enums as a non-exhaustive
+- Ignore devices with `scope` attributes different from `System` for Linux [#18](https://github.com/svartalf/rust-battery/issues/18)
 - Update outdated `mach` dependency for Mac OS
 
 ## [0.6.2] - 2019-02-28

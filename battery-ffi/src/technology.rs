@@ -8,6 +8,7 @@ use battery::Technology as RawTech;
 /// Enum members are prefixed here in order to not have "redeclaration of enumerator" error in C.
 #[repr(u8)]
 pub enum Technology {
+    // DO NOT RE-ORDER VALUES IN THIS ENUM, IT WILL AFFECT FFI USERS
     TechnologyUnknown = 0,
     TechnologyLithiumIon = 1,
     TechnologyLeadAcid = 2,
@@ -30,7 +31,10 @@ impl From<RawTech> for Technology {
             RawTech::NickelCadmium => Technology::TechnologyNickelCadmium,
             RawTech::NickelZinc => Technology::TechnologyNickelZinc,
             RawTech::LithiumIronPhosphate => Technology::TechnologyLithiumIronPhosphate,
-            RawTech::RechargeableAlkalineManganese => Technology::TechnologyRechargeableAlkalineManganese,
+            RawTech::RechargeableAlkalineManganese => {
+                Technology::TechnologyRechargeableAlkalineManganese
+            }
+            _ => Technology::TechnologyUnknown,
         }
     }
 }

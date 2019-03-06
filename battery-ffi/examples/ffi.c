@@ -12,10 +12,6 @@
 
 #include "battery_ffi.h"
 
-float from_millis(uint32_t value) {
-    return (float) value / 1000;
-}
-
 void pretty_print(Battery *battery, uint32_t *idx) {
     printf("Device:\t\t\t%d\n", *idx);
 
@@ -66,11 +62,11 @@ void pretty_print(Battery *battery, uint32_t *idx) {
             printf("full\n");
             break;
     }
-    printf("  energy:\t\t%.2f Wh\n", from_millis(battery_get_energy(battery)));
-    printf("  energy-full:\t\t%.2f Wh\n", from_millis(battery_get_energy_full(battery)));
-    printf("  energy-full-design:\t%.2f Wh\n", from_millis(battery_get_energy_full_design(battery)));
-    printf("  energy-rate:\t\t%.2f W\n", from_millis(battery_get_energy_rate(battery)));
-    printf("  voltage:\t\t%.2f V\n", from_millis(battery_get_voltage(battery)));
+    printf("  energy:\t\t%.2f joule\n", battery_get_energy(battery));
+    printf("  energy-full:\t\t%.2f joule\n", battery_get_energy_full(battery));
+    printf("  energy-full-design:\t%.2f joule\n", battery_get_energy_full_design(battery));
+    printf("  energy-rate:\t\t%.2f W\n", battery_get_energy_rate(battery));
+    printf("  voltage:\t\t%.2f V\n", battery_get_voltage(battery));
 
     printf("  technology:\t\t");
     switch (battery_get_technology(battery)) {
@@ -105,24 +101,24 @@ void pretty_print(Battery *battery, uint32_t *idx) {
 
     uint64_t time_to_full = battery_get_time_to_full(battery);
     if ((state == StateCharging) && (time_to_full > 0)) {
-        printf("  time-to-full:\t\t%d sec.\n", time_to_full);
+        printf("  time-to-full:\t\t%ld sec.\n", time_to_full);
     }
 
     uint64_t time_to_empty = battery_get_time_to_empty(battery);
     if ((state == StateDischarging) && (time_to_empty > 0)) {
-        printf("  time-to-empty:\t\t%d sec.\n", time_to_empty);
+        printf("  time-to-empty:\t\t%ld sec.\n", time_to_empty);
     }
 
-    printf("  percentage:\t\t%.2f %%\n", battery_get_percentage(battery));
+    printf("  state of charge:\t\t%.2f %%\n", battery_get_state_of_charge(battery));
     float temp = battery_get_temperature(battery);
     printf("  temperature:\t\t");
     if (temp < FLT_MAX) {
-        printf("%.2f C\n", temp);
+        printf("%.2f K\n", temp);
     } else {
         printf("N/A\n");
     }
 
-    printf("  capacity:\t\t%.2f %%\n", battery_get_capacity(battery));
+    printf("  state of health:\t\t%.2f %%\n", battery_get_state_of_health(battery));
     uint32_t cycle_count = battery_get_cycle_count(battery);
     printf("  cycle-count:\t\t");
     if (cycle_count < UINT_MAX) {

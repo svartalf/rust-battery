@@ -1,10 +1,13 @@
-use std::time::Duration;
-
 use crate::platform::traits::BatteryDevice;
+use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
+use crate::units::energy::watt_hour;
+use crate::units::power::milliwatt;
 use super::device::IoKitDevice;
 use super::traits::DataSource;
 use super::iokit::Result;
 
+/// This data source is not using uom types, because it is easier to create test suites
+/// from the `ioreg` tool output that way (which values are in mV, mA, mAh and mWh).
 #[derive(Debug, Default)]
 struct TestDataSource {
     fully_charged: bool,
@@ -36,35 +39,37 @@ impl DataSource for TestDataSource {
         self.is_charging
     }
 
-    fn voltage(&self) -> u32 {
-        self.voltage
+    fn voltage(&self) -> ElectricPotential {
+        millivolt!(self.voltage)
     }
 
-    fn amperage(&self) -> i32 {
-        self.amperage
+    fn amperage(&self) -> ElectricCurrent {
+        milliampere!(self.amperage.abs())
     }
 
-    fn design_capacity(&self) -> u32 {
-        self.design_capacity
+    fn design_capacity(&self) -> ElectricCharge {
+        milliampere_hour!(self.design_capacity)
     }
 
-    fn max_capacity(&self) -> u32 {
-        self.max_capacity
+    fn max_capacity(&self) -> ElectricCharge {
+        milliampere_hour!(self.max_capacity)
     }
 
-    fn current_capacity(&self) -> u32 {
-        self.current_capacity
+    fn current_capacity(&self) -> ElectricCharge {
+        milliampere_hour!(self.current_capacity)
     }
 
-    fn temperature(&self) -> Option<f32> {
-        self.temperature
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
+        self.temperature.map(|value| {
+            celsius!(value)
+        })
     }
 
     fn cycle_count(&self) -> Option<u32> {
         self.cycle_count
     }
 
-    fn time_remaining(&self) -> Option<Duration> {
+    fn time_remaining(&self) -> Option<Time> {
         None
     }
 
@@ -81,21 +86,6 @@ impl DataSource for TestDataSource {
     }
 }
 
-// Based on the https://github.com/svartalf/rust-battery/pull/10
-#[test]
-fn test_energy_multiplication_overflow() {
-    let data = TestDataSource {
-        current_capacity: 6232,
-        max_capacity: 6324,
-        voltage: 12701,
-        ..Default::default()
-    };
-    let device: IoKitDevice = data.into();
-
-    assert!(device.percentage() >= 0.0);
-    assert!(device.percentage() <= 100.0);
-}
-
 // Based on the https://github.com/svartalf/rust-battery/issues/8
 #[test]
 fn test_energy_calculation() {
@@ -109,8 +99,11 @@ fn test_energy_calculation() {
     };
     let device: IoKitDevice = data.into();
 
-    assert_eq!(device.energy_rate(), 13292);
-    assert_eq!(device.energy(), 50477);
-    assert_eq!(device.energy_full(), 52797);
-    assert_eq!(device.energy_full_design(), 55309);
+    // TODO: It would be nice to use some approximate equal asserts here,
+    // but for now it is enough to check if values are kinda similar to expected
+    // and we are not comparing milliwatts to megawatts
+    assert_eq!(device.energy_rate().get::<milliwatt>().floor(), 13292.0);
+    assert_eq!(device.energy().get::<watt_hour>().floor(), 50.0);
+    assert_eq!(device.energy_full().get::<watt_hour>().floor(), 52.0);
+    assert_eq!(device.energy_full_design().get::<watt_hour>().floor(), 55.0);
 }

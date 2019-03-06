@@ -2,7 +2,11 @@
 
 use super::util::tabs;
 use super::util::graph;
+
 use battery::Battery;
+use battery::units::power::watt;
+use battery::units::electric_potential::volt;
+use battery::units::thermodynamic_temperature::degree_celsius;
 
 #[derive(Debug)]
 pub struct BatteryStats<'b> {
@@ -10,12 +14,6 @@ pub struct BatteryStats<'b> {
     pub voltage_graph: graph::GraphData<'b>,
     pub energy_rate_graph: graph::GraphData<'b>,
     pub temperature_graph: graph::GraphData<'b>,
-}
-
-impl<'b> BatteryStats<'b> {
-    pub fn info_rows(&self) -> Vec<(String, String)> {
-        vec![]
-    }
 }
 
 #[derive(Debug)]
@@ -57,10 +55,10 @@ impl<'a> App<'a> {
     pub fn update(&mut self) {
         for stat in self.batteries.iter_mut() {
             let _ = self.manager.refresh(&mut stat.battery);
-            stat.voltage_graph.push(f64::from(stat.battery.voltage()) / 1_000.0);
-            stat.energy_rate_graph.push(f64::from(stat.battery.energy_rate()) / 1_000.0);
+            stat.voltage_graph.push(f64::from(stat.battery.voltage().get::<volt>()));
+            stat.energy_rate_graph.push(f64::from(stat.battery.energy_rate().get::<watt>()));
             if let Some(temp) = stat.battery.temperature() {
-                stat.temperature_graph.push(f64::from(temp));
+                stat.temperature_graph.push(f64::from(temp.get::<degree_celsius>()));
             }
         }
     }

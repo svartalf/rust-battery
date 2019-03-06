@@ -46,7 +46,7 @@ matrix:
 cache:
     - cargo
 before_cache:
-  - chmod -R a+r ${HOME}/.cargo
+    - chmod -R a+r ${HOME}/.cargo
 
 before_install:
     - cargo install --force cross

@@ -1,6 +1,6 @@
 use std::fmt::Debug;
-use std::time::Duration;
 
+use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
 use super::iokit::Result;
 
 /// Used for IOPMPowerSource wrapper and for tests.
@@ -23,30 +23,30 @@ pub trait DataSource: Debug + 'static {
     fn is_charging(&self) -> bool;
 
     /// kIOPMPSVoltageKey, mV
-    fn voltage(&self) -> u32;
+    fn voltage(&self) -> ElectricPotential;
 
     /// kIOPMPSAmperageKey, mA
-    fn amperage(&self) -> i32;
+    fn amperage(&self) -> ElectricCurrent;
 
     /// kIOPMPSDesignCapacityKey, mAh
     ///
     /// Does not seems to be declared in the documentation anymore.
-    fn design_capacity(&self) -> u32;
+    fn design_capacity(&self) -> ElectricCharge;
 
     /// kIOPMPSMaxCapacityKey, mAh
-    fn max_capacity(&self) -> u32;
+    fn max_capacity(&self) -> ElectricCharge;
 
     /// kIOPMPSCurrentCapacityKey, mAh
-    fn current_capacity(&self) -> u32;
+    fn current_capacity(&self) -> ElectricCharge;
 
     /// kIOPMPSBatteryTemperatureKey
-    fn temperature(&self) -> Option<f32>;
+    fn temperature(&self) -> Option<ThermodynamicTemperature>;
 
     /// kIOPMPSCycleCountKey
     fn cycle_count(&self) -> Option<u32>;
 
     /// kIOPMPSTimeRemainingKey, minutes
-    fn time_remaining(&self) -> Option<Duration>;
+    fn time_remaining(&self) -> Option<Time>;
 
     /// kIOPMPSManufacturerKey
     fn manufacturer(&self) -> Option<String>;
@@ -76,27 +76,27 @@ impl<T> DataSource for Box<T> where T: DataSource + ?Sized {
         (**self).is_charging()
     }
 
-    fn voltage(&self) -> u32 {
+    fn voltage(&self) -> ElectricPotential {
         (**self).voltage()
     }
 
-    fn amperage(&self) -> i32 {
+    fn amperage(&self) -> ElectricCurrent {
         (**self).amperage()
     }
 
-    fn design_capacity(&self) -> u32 {
+    fn design_capacity(&self) -> ElectricCharge {
         (**self).design_capacity()
     }
 
-    fn max_capacity(&self) -> u32 {
+    fn max_capacity(&self) -> ElectricCharge {
         (**self).max_capacity()
     }
 
-    fn current_capacity(&self) -> u32 {
+    fn current_capacity(&self) -> ElectricCharge {
         (**self).current_capacity()
     }
 
-    fn temperature(&self) -> Option<f32> {
+    fn temperature(&self) -> Option<ThermodynamicTemperature> {
         (**self).temperature()
     }
 
@@ -104,7 +104,7 @@ impl<T> DataSource for Box<T> where T: DataSource + ?Sized {
         (**self).cycle_count()
     }
 
-    fn time_remaining(&self) -> Option<Duration> {
+    fn time_remaining(&self) -> Option<Time> {
         (**self).time_remaining()
     }
 

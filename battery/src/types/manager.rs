@@ -1,11 +1,11 @@
+use std::default;
 use std::io;
 use std::iter;
-use std::default;
 
-use crate::Battery;
+use crate::platform::traits::BatteryManager;
 use crate::platform::Iterator as InnerIterator;
 use crate::platform::Manager as InnerManager;
-use crate::platform::traits::BatteryManager;
+use crate::Battery;
 
 /// Manager for batteries available in system.
 ///

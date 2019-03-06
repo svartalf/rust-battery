@@ -1,11 +1,11 @@
-use crate::{Manager, Batteries, Battery};
+use crate::{Batteries, Battery, Manager};
 
 /// Creates new batteries manager instance.
 ///
 /// Returns opaque pointer to it. Caller is required to call [battery_manager_free](fn.battery_manager_free.html)
 /// to properly free memory.
 #[no_mangle]
-pub extern fn battery_manager_new() -> *mut Manager {
+pub extern "C" fn battery_manager_new() -> *mut Manager {
     Box::into_raw(Box::new(Manager::new()))
 }
 
@@ -17,7 +17,7 @@ pub extern fn battery_manager_new() -> *mut Manager {
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern fn battery_manager_iter(ptr: *mut Manager) -> *mut Batteries {
+pub unsafe extern "C" fn battery_manager_iter(ptr: *mut Manager) -> *mut Batteries {
     assert!(!ptr.is_null());
     let manager = &*ptr;
 
@@ -33,7 +33,10 @@ pub unsafe extern fn battery_manager_iter(ptr: *mut Manager) -> *mut Batteries {
 /// # Returns
 ///
 /// `0` if everything is okay, `1` if refresh failed and `battery_ptr` contains stale information.
-pub unsafe extern fn battery_manager_refresh(manager_ptr: *mut Manager, battery_ptr: *mut Battery) -> libc::c_int {
+pub unsafe extern "C" fn battery_manager_refresh(
+    manager_ptr: *mut Manager,
+    battery_ptr: *mut Battery,
+) -> libc::c_int {
     assert!(!manager_ptr.is_null());
     let manager = &mut *manager_ptr;
 
@@ -49,7 +52,7 @@ pub unsafe extern fn battery_manager_refresh(manager_ptr: *mut Manager, battery_
 
 /// Frees manager instance.
 #[no_mangle]
-pub unsafe extern fn battery_manager_free(ptr: *mut Manager) {
+pub unsafe extern "C" fn battery_manager_free(ptr: *mut Manager) {
     if ptr.is_null() {
         return;
     }

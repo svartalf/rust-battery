@@ -10,7 +10,7 @@ fn main() -> io::Result<()> {
         Some(battery) => battery,
         None => {
             eprintln!("Unable to find any batteries");
-            return Err(io::Error::from(io::ErrorKind::NotFound))
+            return Err(io::Error::from(io::ErrorKind::NotFound));
         }
     };
 

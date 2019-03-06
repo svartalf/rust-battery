@@ -87,6 +87,7 @@ impl<'g> GraphData<'g> {
         [self.y_lower(), self.y_upper()]
     }
 
+    #[allow(clippy::cast_lossless)]
     pub fn push(&mut self, value: f64) {
         if self.points.len() == RESOLUTION {
             self.points.remove(0);

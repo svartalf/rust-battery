@@ -1,12 +1,12 @@
 //! This crate provides cross-platform information about batteries.
 //!
 //! Gives access to a system independent battery state, capacity, charge and voltage values
-//! recalculated as necessary to be returned in `mW`, `mWh` or `mV` units.
+//! recalculated as necessary to be returned in [SI measurement units](https://www.bipm.org/en/measurement-units/).
 //!
 //! ## Supported platforms
 //!
 //! * Linux 2.6.39+
-//! * MacOS (10.10+ probably, needs to be confirmed)
+//! * MacOS 10.10+
 //! * Windows 7+
 //! * FreeBSD
 //! * DragonFlyBSD
@@ -20,15 +20,20 @@
 #![deny(unused)]
 #![deny(unstable_features)]
 
-#[macro_use] extern crate cfg_if;
+#[macro_use]
+extern crate cfg_if;
 
 #[cfg(target_os = "windows")]
-#[macro_use] extern crate winapi;
+#[macro_use]
+extern crate winapi;
 
 #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
-#[macro_use] extern crate nix;
+#[macro_use]
+extern crate nix;
 
 mod types;
+#[macro_use]
+pub mod units;
 mod platform;
 
-pub use self::types::{Manager, Batteries, Battery, State, Technology};
+pub use self::types::{Batteries, Battery, Manager, State, Technology};
