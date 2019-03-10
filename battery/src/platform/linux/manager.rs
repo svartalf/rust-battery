@@ -1,30 +1,33 @@
-use std::io;
-use std::default::Default;
+use std::path::{Path, PathBuf};
 
-use crate::{Battery};
-use crate::platform::traits::{BatteryManager};
-
-use super::SysFsIterator;
+use super::device::SysFsDevice;
+use super::iterator::SysFsIterator;
+use crate::platform::traits::*;
+use crate::Result;
 
 static SYSFS_ROOT: &'static str = "/sys/class/power_supply";
 
 #[derive(Debug)]
-pub struct SysFsManager;
+pub struct SysFsManager {
+    root: PathBuf,
+}
 
 impl SysFsManager {
-    pub fn iter(&self) -> SysFsIterator {
-        SysFsIterator::from_path(SYSFS_ROOT)
+    pub fn path(&self) -> &Path {
+        self.root.as_path()
     }
 }
 
 impl BatteryManager for SysFsManager {
-    fn refresh(&mut self, battery: &mut Battery) -> io::Result<()> {
-        battery.get_mut_ref().refresh()
-    }
-}
+    type Iterator = SysFsIterator;
 
-impl Default for SysFsManager {
-    fn default() -> SysFsManager {
-        SysFsManager{}
+    fn new() -> Result<Self> {
+        Ok(Self {
+            root: PathBuf::from(SYSFS_ROOT),
+        })
+    }
+
+    fn refresh(&self, device: &mut SysFsDevice) -> Result<()> {
+        device.refresh()
     }
 }

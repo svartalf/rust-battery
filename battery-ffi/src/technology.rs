@@ -31,9 +31,7 @@ impl From<RawTech> for Technology {
             RawTech::NickelCadmium => Technology::TechnologyNickelCadmium,
             RawTech::NickelZinc => Technology::TechnologyNickelZinc,
             RawTech::LithiumIronPhosphate => Technology::TechnologyLithiumIronPhosphate,
-            RawTech::RechargeableAlkalineManganese => {
-                Technology::TechnologyRechargeableAlkalineManganese
-            }
+            RawTech::RechargeableAlkalineManganese => Technology::TechnologyRechargeableAlkalineManganese,
             _ => Technology::TechnologyUnknown,
         }
     }

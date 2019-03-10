@@ -3,7 +3,7 @@
 use super::util::tabs;
 use super::util::graph;
 
-use battery::Battery;
+use battery::{Battery, Result};
 use battery::units::power::watt;
 use battery::units::electric_potential::volt;
 use battery::units::thermodynamic_temperature::degree_celsius;
@@ -24,8 +24,9 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn new(manager: battery::Manager) -> App<'a> {
-        let stats: Vec<BatteryStats> = manager.iter()
+    pub fn new(manager: battery::Manager) -> Result<App<'a>> {
+        let stats: Vec<BatteryStats> = manager.batteries()?
+            .flatten()
             .map(|b| {
                 BatteryStats {
                     battery: b,
@@ -45,11 +46,11 @@ impl<'a> App<'a> {
         })
         .collect();
 
-        App {
+        Ok(App {
             manager,
             batteries: stats,
             tabs: tabs::TabsState::new(names),
-        }
+        })
     }
 
     pub fn update(&mut self) {

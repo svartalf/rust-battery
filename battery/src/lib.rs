@@ -19,6 +19,7 @@
 
 #![deny(unused)]
 #![deny(unstable_features)]
+#![deny(bare_trait_objects)]
 
 #[macro_use]
 extern crate cfg_if;
@@ -34,6 +35,8 @@ extern crate nix;
 mod types;
 #[macro_use]
 pub mod units;
+pub mod errors;
 mod platform;
 
+pub use self::errors::{Error, Result};
 pub use self::types::{Batteries, Battery, Manager, State, Technology};

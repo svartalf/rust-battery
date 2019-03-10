@@ -7,60 +7,74 @@
 //! instead of the default `joules`, you will need the measurement unit from the corresponding module:
 //!
 //! ```edition2018
+//! # use battery::Result;
 //! use battery::units::energy::watt_hour;
 //!
-//! for bat in battery::Manager::new().iter() {
-//!     println!("Energy: {} Wh", bat.energy().get::<watt_hour>());
+//! # fn main() -> Result<()> {
+//! for bat in battery::Manager::new()?.batteries()? {
+//!     println!("Energy: {} Wh", bat?.energy().get::<watt_hour>());
 //! }
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! Same thing applies to other units (temperature is stored in Kelvins):
 //!
 //! ```edition2018
+//! # use battery::Result;
 //! use battery::units::thermodynamic_temperature::degree_celsius;
 //!
-//! for bat in battery::Manager::new().iter() {
-//!     if let Some(value) = bat.temperature() {
+//! # fn main() -> Result<()> {
+//! for bat in battery::Manager::new()?.batteries()? {
+//!     if let Some(value) = bat?.temperature() {
 //!         println!("Temperature: {} °C", value.get::<degree_celsius>());
 //!     }
 //! }
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! percents:
 //!
 //! ```edition2018
+//! # use battery::Result;
 //! use battery::units::ratio::percent;
 //!
-//! for bat in battery::Manager::new().iter() {
-//!     println!("State of charge: {} %", bat.state_of_charge().get::<percent>());
+//! # fn main() -> Result<()> {
+//! for bat in battery::Manager::new()?.batteries()? {
+//!     println!("State of charge: {} %", bat?.state_of_charge().get::<percent>());
 //! }
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! or time:
 //!
 //! ```edition2018
+//! # use battery::Result;
 //! use std::time::Duration;
 //!
 //! use battery::units::time::nanosecond;
 //!
-//! for bat in battery::Manager::new().iter() {
-//!     if let Some(value) = bat.time_to_full() {
+//! # fn main() -> Result<()> {
+//! for bat in battery::Manager::new()?.batteries()? {
+//!     if let Some(value) = bat?.time_to_full() {
 //!         let duration = Duration::from_nanos(value.get::<nanosecond>() as u64);
 //!     }
 //! }
+//! # Ok(())
+//! # }
 //! ```
 
 #![allow(unused_macros)]
 
 // Re-exports for easier crate usage
 pub use uom::si::f32::{
-    ElectricCharge, ElectricCurrent, ElectricPotential, Energy, Power, Ratio,
-    ThermodynamicTemperature, Time,
+    ElectricCharge, ElectricCurrent, ElectricPotential, Energy, Power, Ratio, ThermodynamicTemperature, Time,
 };
 pub use uom::si::Unit;
 pub use uom::si::{
-    electric_charge, electric_current, electric_potential, energy, power, ratio,
-    thermodynamic_temperature, time,
+    electric_charge, electric_current, electric_potential, energy, power, ratio, thermodynamic_temperature, time,
 };
 
 use num_traits::ToPrimitive;
@@ -109,14 +123,8 @@ impl_into_quantity!(power::microwatt, Power);
 impl_into_quantity!(electric_potential::volt, ElectricPotential);
 impl_into_quantity!(electric_potential::millivolt, ElectricPotential);
 impl_into_quantity!(electric_potential::microvolt, ElectricPotential);
-impl_into_quantity!(
-    thermodynamic_temperature::degree_celsius,
-    ThermodynamicTemperature
-);
-impl_into_quantity!(
-    thermodynamic_temperature::decikelvin,
-    ThermodynamicTemperature
-);
+impl_into_quantity!(thermodynamic_temperature::degree_celsius, ThermodynamicTemperature);
+impl_into_quantity!(thermodynamic_temperature::decikelvin, ThermodynamicTemperature);
 impl_into_quantity!(ratio::percent, Ratio);
 impl_into_quantity!(time::second, Time);
 impl_into_quantity!(time::minute, Time);
@@ -214,10 +222,7 @@ macro_rules! percent {
 /// Create `ThermodynamicTemperature` quantity with `degree_celsius` unit
 macro_rules! celsius {
     ($value:expr) => {
-        unit!(
-            $crate::units::thermodynamic_temperature::degree_celsius,
-            $value
-        )
+        unit!($crate::units::thermodynamic_temperature::degree_celsius, $value)
     };
 }
 
@@ -246,4 +251,26 @@ macro_rules! unit {
     ($unit:ty, $value:expr) => {
         <$unit as $crate::units::IntoQuantity<_>>::from_primitive($value)
     };
+}
+
+/// For values in `0…1` ratio (or `0…100` %).
+///
+/// Method `bound` caps value into this range.
+pub(crate) trait Bound: Sized {
+    fn into_bounded(self) -> Self;
+}
+
+impl Bound for Ratio {
+    #[inline]
+    fn into_bounded(mut self) -> Self {
+        if self.value < 0.0 {
+            self.value = 0.0;
+        }
+
+        if self.value > 1.0 {
+            self.value = 1.0;
+        }
+
+        self
+    }
 }

@@ -6,6 +6,7 @@
 //
 // 3. Run `./a.out`
 
+#include <string.h>
 #include <stdio.h>
 #include <float.h>
 #include <limits.h>
@@ -109,7 +110,7 @@ void pretty_print(Battery *battery, uint32_t *idx) {
         printf("  time-to-empty:\t\t%ld sec.\n", time_to_empty);
     }
 
-    printf("  state of charge:\t\t%.2f %%\n", battery_get_state_of_charge(battery));
+    printf("  state of charge:\t%.2f %%\n", battery_get_state_of_charge(battery));
     float temp = battery_get_temperature(battery);
     printf("  temperature:\t\t");
     if (temp < FLT_MAX) {
@@ -118,7 +119,7 @@ void pretty_print(Battery *battery, uint32_t *idx) {
         printf("N/A\n");
     }
 
-    printf("  state of health:\t\t%.2f %%\n", battery_get_state_of_health(battery));
+    printf("  state of health:\t%.2f %%\n", battery_get_state_of_health(battery));
     uint32_t cycle_count = battery_get_cycle_count(battery);
     printf("  cycle-count:\t\t");
     if (cycle_count < UINT_MAX) {
@@ -128,13 +129,35 @@ void pretty_print(Battery *battery, uint32_t *idx) {
     }
 }
 
+void print_error() {
+    int length = battery_last_error_length();
+    char *message = malloc(length);
+    // Handle possible error return here
+    battery_last_error_message(message, strlen(message));
+    printf("%s", message);
+    free(message);
+}
+
 void main() {
     Manager *manager = battery_manager_new();
+    if (manager == NULL) {
+        print_error();
+        return;
+    }
+
     Batteries *iterator = battery_manager_iter(manager);
+    if (iterator == NULL) {
+        print_error();
+        return;
+    }
+
     uint32_t idx = 0;
     while (true) {
         Battery *battery = battery_iterator_next(iterator);
         if (battery == NULL) {
+            if (battery_have_last_error() == 1) {
+                print_error();
+            }
             break;
         }
 

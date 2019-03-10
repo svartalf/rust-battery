@@ -59,9 +59,9 @@ pub fn start() -> Result<(), Box<Error>> {
     terminal.hide_cursor()?;
 
     let events = Events::new();
-    let manager = battery::Manager::new();
+    let manager = battery::Manager::new()?;
 
-    let mut app = app::App::new(manager);
+    let mut app = app::App::new(manager)?;
 
     loop {
         terminal.draw(|mut f| {

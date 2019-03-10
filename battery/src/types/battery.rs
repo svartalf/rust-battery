@@ -1,6 +1,7 @@
 use std::fmt;
+use std::ops::{Deref, DerefMut};
 
-use crate::platform::traits::BatteryDevice;
+use crate::platform::traits::*;
 use crate::platform::Device;
 use crate::units::{ElectricPotential, Energy, Power, Ratio, ThermodynamicTemperature, Time};
 use crate::{State, Technology};
@@ -15,7 +16,9 @@ use crate::{State, Technology};
 /// represented as a units from the [uom](https://crates.io/crates/uom) crate.\
 /// If you are unfamiliar with `uom`, check the [units](./units/) module documentation for a few examples
 /// of how to get the values from them.
-pub struct Battery(Device);
+pub struct Battery(Device)
+where
+    Device: BatteryDevice;
 
 impl Battery {
     /// Battery state of charge.
@@ -138,20 +141,12 @@ impl Battery {
     pub fn time_to_empty(&self) -> Option<Time> {
         self.0.time_to_empty()
     }
-
-    #[allow(dead_code)]
-    pub(crate) fn get_ref(&self) -> &Device {
-        &self.0
-    }
-
-    pub(crate) fn get_mut_ref(&mut self) -> &mut Device {
-        &mut self.0
-    }
 }
 
 impl fmt::Debug for Battery {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Battery")
+            .field("impl", &self.0)
             // static info
             .field("vendor", &self.vendor())
             .field("model", &self.model())
@@ -177,7 +172,21 @@ impl fmt::Debug for Battery {
 }
 
 impl From<Device> for Battery {
-    fn from(inner: Device) -> Self {
-        Battery(inner)
+    fn from(device: Device) -> Battery {
+        Battery(device)
+    }
+}
+
+impl Deref for Battery {
+    type Target = Device;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Battery {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }

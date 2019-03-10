@@ -7,3 +7,4 @@ members = [
 
 [patch.crates-io]
 battery = { path = "./battery" }
+battery-ffi = { path = "./battery-ffi" }

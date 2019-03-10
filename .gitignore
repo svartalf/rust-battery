@@ -3,4 +3,5 @@
 **/*.rs.bk
 Cargo.lock
 
+*.orig
 local_build.sh

@@ -6,13 +6,14 @@ use core_foundation::dictionary::{CFDictionary, CFMutableDictionary, CFMutableDi
 use core_foundation::string::CFString;
 use mach::{port, mach_port, kern_return, traps};
 
-use super::{sys, errors};
+use crate::Result;
+use super::{sys};
 
 #[derive(Debug)]
 pub struct IoMasterPort(mach_port_t);
 
 impl IoMasterPort {
-    pub fn new() -> errors::Result<IoMasterPort> {
+    pub fn new() -> Result<IoMasterPort> {
         let mut master_port: port::mach_port_t = port::MACH_PORT_NULL;
 
         unsafe {
@@ -22,7 +23,7 @@ impl IoMasterPort {
         Ok(IoMasterPort(master_port))
     }
 
-    pub fn get_services(&self) -> errors::Result<IoIterator> {
+    pub fn get_services(&self) -> Result<IoIterator> {
         let service = unsafe {
             let ret = sys::IOServiceMatching(sys::IOPM_SERVICE_NAME);
             assert_ne!(ret as *const _, kCFNull);
@@ -56,7 +57,7 @@ impl IoObject {
     /// Returns typed dictionary with this object properties.
     /// In our case all keys are CFStrings, so there is no need to return
     /// untyped dict here.
-    pub fn properties(&self) -> errors::Result<CFDictionary<CFString, CFType>> {
+    pub fn properties(&self) -> Result<CFDictionary<CFString, CFType>> {
         unsafe {
             let mut props: CFMutableDictionaryRef = mem::uninitialized();
 

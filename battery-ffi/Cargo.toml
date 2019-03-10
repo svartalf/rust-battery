@@ -1,6 +1,6 @@
 [package]
 name = "battery-ffi"
-version = "0.2.0"
+version = "0.7.0"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "FFI bindings for battery crate"

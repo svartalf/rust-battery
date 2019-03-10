@@ -14,6 +14,7 @@ $ LD_LIBRARY_PATH=../../target/debug/ ./ffi.py
 
 import sys
 import ctypes
+import logging
 
 prefix = {'win32': ''}.get(sys.platform, 'lib')
 extension = {'darwin': 'dylib', 'win32': 'dll'}.get(sys.platform, 'so')
@@ -56,19 +57,35 @@ class Battery(ctypes.Structure):
     pass
 
 
+def check_result(result, _func, _args):
+    # Checking if passed value is not `NULL` pointer.
+    if lib.battery_have_last_error() == 0:
+        return result
+
+    # If it is, constructing error message and raising it
+    length = lib.battery_last_error_length()
+    message = ctypes.create_string_buffer(length)
+    lib.battery_last_error_message(ctypes.byref(message), len(message))
+
+    raise ValueError(message.value)
+
+
 #
 # Bindings for exported functions
 #
 
 lib.battery_manager_new.argtypes = None
 lib.battery_manager_new.restype = ctypes.POINTER(Manager)
+lib.battery_manager_new.errcheck = check_result
 lib.battery_manager_iter.argtypes = (ctypes.POINTER(Manager), )
 lib.battery_manager_iter.restype = ctypes.POINTER(Batteries)
+lib.battery_manager_iter.errcheck = check_result
 lib.battery_manager_free.argtypes = (ctypes.POINTER(Manager), )
 lib.battery_manager_free.restype = None
 
 lib.battery_iterator_next.argtypes = (ctypes.POINTER(Batteries), )
 lib.battery_iterator_next.restype = ctypes.POINTER(Battery)
+lib.battery_iterator_next.errcheck = check_result
 
 lib.battery_free.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_free.restype = None
@@ -106,6 +123,14 @@ lib.battery_get_state_of_health.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_state_of_health.restype = ctypes.c_float
 lib.battery_get_cycle_count.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_cycle_count.restype = ctypes.c_uint32
+
+lib.battery_have_last_error.argtypes = None
+lib.battery_have_last_error.restype = ctypes.c_int
+lib.battery_last_error_length.argtypes = None
+lib.battery_last_error_length.restype = ctypes.c_int
+lib.battery_last_error_message.argtypes = (ctypes.c_char_p, ctypes.c_int)
+lib.battery_last_error_message.restype = ctypes.c_int
+
 
 if __name__ == '__main__':
     manager = lib.battery_manager_new()

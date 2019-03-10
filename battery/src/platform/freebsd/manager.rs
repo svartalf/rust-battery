@@ -1,29 +1,44 @@
-use std::io;
+use std::fmt;
+use std::ops::Deref;
+use std::os::unix::io::AsRawFd;
 
-use crate::Battery;
-use crate::platform::traits::BatteryManager;
-use super::IoCtlDevice;
-use super::IoCtlIterator;
+use crate::{Result, Error};
+use crate::platform::traits::{BatteryManager, BatteryIterator};
+use super::{acpi, IoCtlIterator};
 
-#[derive(Debug, Default)]
-pub struct IoCtlManager;
-
-impl IoCtlManager {
-    pub fn iter(&self) -> IoCtlIterator {
-        let inner = match IoCtlDevice::new() {
-            Ok(device) => Some(device),
-            Err(_) => None,
-        };
-
-        IoCtlIterator(inner)
-    }
-}
+pub struct IoCtlManager(acpi::AcpiDevice);
 
 impl BatteryManager for IoCtlManager {
-    fn refresh(&mut self, battery: &mut Battery) -> io::Result<()> {
-        *battery.get_mut_ref() = IoCtlDevice::new()?;
+    type Iterator = IoCtlIterator;
 
-        Ok(())
+    fn new() -> Result<Self> {
+        Ok(Self(acpi::AcpiDevice::new()?))
+    }
+
+    fn refresh(&self, device: &mut <Self::Iterator as BatteryIterator>::Device) -> Result<()> {
+        let bif = self.0.bif(device.unit())?;
+        let bst = self.0.bst(device.unit())?;
+
+        match (bif, bst) {
+            (Some(bif), Some(bst)) => device.refresh(bif, bst),
+            (None, _) => Err(Error::invalid_data("Returned bif struct is invalid")),
+            (_, None) => Err(Error::invalid_data("Returned bst struct is invalid")),
+        }
     }
 }
 
+impl Deref for IoCtlManager {
+    type Target = acpi::AcpiDevice;
+
+    fn deref(&self) -> &acpi::AcpiDevice {
+        &self.0
+    }
+}
+
+impl fmt::Debug for IoCtlManager {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("FreeBSD")
+            .field("fd", &self.0.as_raw_fd())
+            .finish()
+    }
+}

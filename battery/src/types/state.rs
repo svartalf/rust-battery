@@ -52,3 +52,9 @@ impl fmt::Display for State {
         write!(f, "{}", display)
     }
 }
+
+impl Default for State {
+    fn default() -> Self {
+        State::Unknown
+    }
+}

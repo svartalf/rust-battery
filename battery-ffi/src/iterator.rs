@@ -7,25 +7,35 @@ use crate::{Batteries, Battery};
 /// Caller is required to call [battery_free](fn.battery_free.html) in order
 /// to properly free memory for the returned battery instance.
 ///
-/// Caller is required to call [battery_iterator_free](fn.battery_iterator_free.html)
-/// if order to properly free memory for the returned batteries iterator instance.
-///
 /// # Panics
 ///
-/// This function will panic if any passed pointer is `NULL`
+/// This function will panic if passed pointer is `NULL`.
 ///
 /// # Returns
 ///
-/// If there is no batteries left to iterate, this function returns `NULL`,
-/// otherwise it returns pointer to next battery.
+/// Returns pointer to next battery.
+///
+/// If there is no batteries left to iterate or some error happened, this function will return `NULL`.
+///
+/// Caller is required to differentiate between these two cases and should check
+/// if there was any error with [battery_have_last_error](fn.battery_have_last_error.html).
+///
+/// If there is no batteries left, `battery_have_last_error` will return `0`.
 #[no_mangle]
 pub unsafe extern "C" fn battery_iterator_next(ptr: *mut Batteries) -> *mut Battery {
     assert!(!ptr.is_null());
     let iterator = &mut *ptr;
 
     match iterator.next() {
-        None => ptr::null_mut(),
-        Some(battery) => Box::into_raw(Box::new(battery)),
+        None => {
+            crate::errors::clear_last_error();
+            ptr::null_mut()
+        }
+        Some(Ok(battery)) => Box::into_raw(Box::new(battery)),
+        Some(Err(e)) => {
+            crate::errors::set_last_error(e);
+            ptr::null_mut()
+        }
     }
 }
 

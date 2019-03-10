@@ -1,12 +1,27 @@
+use std::ptr;
+
 use crate::{Batteries, Battery, Manager};
 
 /// Creates new batteries manager instance.
 ///
-/// Returns opaque pointer to it. Caller is required to call [battery_manager_free](fn.battery_manager_free.html)
+/// # Returns
+///
+/// Returns opaque pointer to manager instance.
+/// Caller is required to call [battery_manager_free](fn.battery_manager_free.html)
 /// to properly free memory.
+///
+/// `NULL` pointer might be returned if manager creation had failed.
+/// Caller can check [battery_last_error_message](fn.battery_last_error_message.html)
+/// for error details.
 #[no_mangle]
 pub extern "C" fn battery_manager_new() -> *mut Manager {
-    Box::into_raw(Box::new(Manager::new()))
+    match Manager::new() {
+        Ok(manager) => Box::into_raw(Box::new(manager)),
+        Err(e) => {
+            crate::errors::set_last_error(e);
+            ptr::null_mut()
+        }
+    }
 }
 
 /// Creates an iterator over batteries from manager instance.
@@ -16,12 +31,24 @@ pub extern "C" fn battery_manager_new() -> *mut Manager {
 /// # Panics
 ///
 /// This function will panic if passed pointer is `NULL`
+///
+/// # Returns
+///
+/// `NULL` pointer will be returned if iterator creation had failed.
+/// Caller can check [battery_last_error_message](fn.battery_last_error_message.html)
+/// for error details.
 #[no_mangle]
 pub unsafe extern "C" fn battery_manager_iter(ptr: *mut Manager) -> *mut Batteries {
     assert!(!ptr.is_null());
     let manager = &*ptr;
 
-    Box::into_raw(Box::new(manager.iter()))
+    match manager.batteries() {
+        Ok(iterator) => Box::into_raw(Box::new(iterator)),
+        Err(e) => {
+            crate::errors::set_last_error(e);
+            ptr::null_mut()
+        }
+    }
 }
 
 /// Refreshes battery information.
@@ -32,21 +59,20 @@ pub unsafe extern "C" fn battery_manager_iter(ptr: *mut Manager) -> *mut Batteri
 ///
 /// # Returns
 ///
-/// `0` if everything is okay, `1` if refresh failed and `battery_ptr` contains stale information.
-pub unsafe extern "C" fn battery_manager_refresh(
-    manager_ptr: *mut Manager,
-    battery_ptr: *mut Battery,
-) -> libc::c_int {
+/// `0` if everything is okay, `-1` if refresh failed and `battery_ptr` contains stale information.
+pub unsafe extern "C" fn battery_manager_refresh(manager_ptr: *mut Manager, battery_ptr: *mut Battery) -> libc::c_int {
     assert!(!manager_ptr.is_null());
     let manager = &mut *manager_ptr;
 
     assert!(!battery_ptr.is_null());
     let mut battery = &mut *battery_ptr;
 
-    // TODO: Should there be better error handling?
     match manager.refresh(&mut battery) {
         Ok(_) => 0,
-        Err(_) => 1,
+        Err(e) => {
+            crate::errors::set_last_error(e);
+            -1
+        }
     }
 }
 

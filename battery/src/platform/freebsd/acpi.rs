@@ -1,38 +1,34 @@
 // https://github.com/freebsd/freebsd/blob/master/sys/dev/acpica/acpiio.h
 // https://github.com/freebsd/freebsd/blob/master/sys/dev/acpica/acpi_battery.c
 
-use std::io;
+use std::fs;
 use std::mem;
 use std::str::FromStr;
 use std::default::Default;
-use std::os::unix::io::{RawFd, IntoRawFd};
+use std::os::unix::io::{IntoRawFd, AsRawFd, RawFd, FromRawFd};
 use std::ffi::CStr;
 
-use nix::Error;
-
-use crate::{State, Technology};
+use crate::{State, Technology, Result};
 
 const ACPI_CMBAT_MAXSTRLEN: usize = 32;
 
 // This one const is not defined in FreeBSD sources,
 // but we are defining it for consistency.
 const ACPI_BATT_STAT_FULL: u32 = 0x0000;
-// Declared at `sys/dev/acpica/acpiio.h`
+// Following are declared at `sys/dev/acpica/acpiio.h`
 const ACPI_BATT_STAT_DISCHARG: u32 = 0x0001;
 const ACPI_BATT_STAT_CHARGING: u32 = 0x0002;
 const ACPI_BATT_STAT_CRITICAL: u32 = 0x0004;
+const ACPI_BATT_STAT_INVALID: u32 = ACPI_BATT_STAT_DISCHARG | ACPI_BATT_STAT_CHARGING;
+const ACPI_BATT_STAT_BST_MASK: u32 = ACPI_BATT_STAT_INVALID | ACPI_BATT_STAT_CRITICAL;
+const ACPI_BATT_STAT_NOT_PRESENT: u32 = ACPI_BATT_STAT_BST_MASK;
 
-/// FOr `AcpiBif` struct capacity is in mWh, rate in mW.
+const ACPI_BATT_UNKNOWN: u32 = 0xffff_ffff;
+
+/// For `AcpiBif` struct capacity is in mWh, rate in mW.
 const ACPI_BIF_UNITS_MW: u32 = 0;
 /// For `AcpiBif` struct capacity is in mAh, rate in mA.
 const ACPI_BIF_UNITS_MA: u32 = 1;
-
-fn map_nix_err(e: Error) -> io::Error {
-    match e {
-        Error::Sys(errno) => errno.into(),
-        other => io::Error::new(io::ErrorKind::Other, other),
-    }
-}
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Units {
@@ -43,7 +39,7 @@ pub enum Units {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct AcpiBif {
-    units: u32,  // mW or mA
+    units: u32,  // mW or mA, see `ACPI_BIF_UNITS_*`
     dcap: u32,  // design capacity,
     lfcap: u32,  // last full capacity,
     btech: u32,  // battery technology,
@@ -59,6 +55,11 @@ pub struct AcpiBif {
 }
 
 impl AcpiBif {
+    // int acpi_battery_bif_valid(struct acpi_bif *bif)
+    pub fn is_valid(&self) -> bool {
+        self.lfcap != 0
+    }
+
     pub fn units(&self) -> Units {
         match self.units {
             ACPI_BIF_UNITS_MW => Units::MilliWatts,
@@ -134,6 +135,12 @@ pub struct AcpiBst {
 }
 
 impl AcpiBst {
+    // int acpi_battery_bst_valid(struct acpi_bst *bst)
+    pub fn is_valid(&self) -> bool {
+        self.state != ACPI_BATT_STAT_NOT_PRESENT && self.cap != ACPI_BATT_UNKNOWN
+            && self.volt != ACPI_BATT_UNKNOWN
+    }
+
     // based on `ACPI_BATT_STAT_*` defines
     #[inline]
     pub fn state(&self) -> State {
@@ -182,7 +189,7 @@ impl Default for AcpiBatteryIoctlArg {
     }
 }
 
-//ioctl_readwrite!(acpiio_batt_get_battinfo, b'B', 0x03, AcpiBatteryIoctlArg);
+ioctl_read!(acpiio_batt_get_units, b'B', 0x01, libc::c_int);
 ioctl_readwrite!(acpiio_batt_get_bif, b'B', 0x10, AcpiBatteryIoctlArg);
 ioctl_readwrite!(acpiio_batt_get_bst, b'B', 0x11, AcpiBatteryIoctlArg);
 
@@ -190,31 +197,81 @@ ioctl_readwrite!(acpiio_batt_get_bst, b'B', 0x11, AcpiBatteryIoctlArg);
 pub struct AcpiDevice(RawFd);
 
 impl AcpiDevice {
-    pub fn new<T: IntoRawFd>(file: T) -> AcpiDevice {
-        AcpiDevice(file.into_raw_fd())
+    pub fn new() -> Result<AcpiDevice> {
+        let file = fs::OpenOptions::new()
+            .read(true)
+            .open("/dev/acpi")?;
+
+        Ok(AcpiDevice(file.into_raw_fd()))
     }
 
-    pub fn bif(&self) -> io::Result<AcpiBif> {
+    /// Count of the available batteries
+    pub fn count(&self) -> Result<libc::c_int> {
+        let mut arg = 0i32;
+        unsafe {
+            acpiio_batt_get_units(self.0, &mut arg as *mut _)?
+        };
+
+        Ok(arg)
+    }
+
+    /// # Returns
+    ///
+    /// * `Ok(Some(bif))` - successfully fetched bif
+    /// * `Ok(None)` - bif was fetched but it is invalid;
+    ///     it is not an error, because we want to skip it silently
+    /// * `Err(e)` - FFI call failed
+    pub fn bif(&self, unit: libc::c_int) -> Result<Option<AcpiBif>> {
         let mut arg = AcpiBatteryIoctlArg::default();
         unsafe {
-            acpiio_batt_get_bif(self.0, &mut arg as *mut _).map_err(map_nix_err)?
+            arg.unit = unit;
+            acpiio_batt_get_bif(self.0, &mut arg as *mut _)?
         };
         let info = unsafe {
             arg.bif
         };
 
-        Ok(info)
+        if info.is_valid() {
+            Ok(Some(info))
+        } else {
+            Ok(None)
+        }
     }
 
-    pub fn bst(&self) -> io::Result<AcpiBst> {
+    /// # Returns
+    ///
+    /// * `Ok(Some(bst))` - successfully fetched bst
+    /// * `Ok(None)` - bst was fetched but it is invalid;
+    ///     it is not an error, because we want to skip it silently
+    /// * `Err(e)` - FFI call failed
+    pub fn bst(&self, unit: i32) -> Result<Option<AcpiBst>> {
         let mut arg = AcpiBatteryIoctlArg::default();
         unsafe {
-            acpiio_batt_get_bst(self.0, &mut arg as *mut _).map_err(map_nix_err)?
+            arg.unit = unit;
+            acpiio_batt_get_bst(self.0, &mut arg as *mut _)?
         };
         let info = unsafe {
             arg.bst
         };
 
-        Ok(info)
+        if info.is_valid() {
+            Ok(Some(info))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
+impl AsRawFd for AcpiDevice {
+    fn as_raw_fd(&self) -> RawFd {
+        self.0
+    }
+}
+
+impl Drop for AcpiDevice {
+    fn drop(&mut self) {
+        unsafe {
+            fs::File::from_raw_fd(self.0);
+        }
     }
 }

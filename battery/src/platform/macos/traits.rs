@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
+use crate::Result;
 use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
-use super::iokit::Result;
 
 /// Used for IOPMPowerSource wrapper and for tests.
 ///
@@ -49,13 +49,13 @@ pub trait DataSource: Debug + 'static {
     fn time_remaining(&self) -> Option<Time>;
 
     /// kIOPMPSManufacturerKey
-    fn manufacturer(&self) -> Option<String>;
+    fn manufacturer(&self) -> Option<&str>;
 
     /// kIOPMPSModelKey
-    fn device_name(&self) -> Option<String>;
+    fn device_name(&self) -> Option<&str>;
 
     /// kIOPMPSSerialKey
-    fn serial_number(&self) -> Option<String>;
+    fn serial_number(&self) -> Option<&str>;
 }
 
 
@@ -108,15 +108,15 @@ impl<T> DataSource for Box<T> where T: DataSource + ?Sized {
         (**self).time_remaining()
     }
 
-    fn manufacturer(&self) -> Option<String> {
+    fn manufacturer(&self) -> Option<&str> {
         (**self).manufacturer()
     }
 
-    fn device_name(&self) -> Option<String> {
+    fn device_name(&self) -> Option<&str> {
         (**self).device_name()
     }
 
-    fn serial_number(&self) -> Option<String> {
+    fn serial_number(&self) -> Option<&str> {
         (**self).serial_number()
     }
 }

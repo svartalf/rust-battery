@@ -1,18 +1,37 @@
-use std::io;
+//! Platform-specific types are required to implement the following traits.
 
-use uom::si::time::{day, hour};
+use std::fmt::Debug;
+use std::rc::Rc;
+
 use num_traits::identities::Zero;
+use uom::si::time::{day, hour};
 
 use crate::units::{ElectricPotential, Energy, Power, Ratio, ThermodynamicTemperature, Time};
-use crate::{Battery, State, Technology};
+use crate::{Result, State, Technology};
 
-pub trait BatteryManager: Default + Sized {
-    fn refresh(&mut self, battery: &mut Battery) -> io::Result<()>;
+pub trait BatteryManager: Debug + Sized {
+    type Iterator: BatteryIterator;
+
+    fn new() -> Result<Self>;
+
+    fn refresh(&self, battery: &mut <Self::Iterator as BatteryIterator>::Device) -> Result<()>;
 }
 
-pub trait BatteryIterator: Iterator<Item = Battery> + Sized {}
+pub trait BatteryIterator: Iterator<Item = Result<<Self as BatteryIterator>::Device>> + Debug + Sized {
+    type Manager: BatteryManager<Iterator = Self>;
+    type Device: BatteryDevice;
 
-pub trait BatteryDevice: Sized {
+    /// Iterator is required to store reference to the `Self::Manager` type,
+    /// even if it does not use it.
+    /// In that case all iterator instances will be freed before the manager.
+    ///
+    /// Implemented `next()` for `<Self as Iterator>` must preload all needed battery data
+    /// in this method, because `BatteryDevice` methods are infallible.
+    fn new(manager: Rc<Self::Manager>) -> Result<Self>;
+}
+
+/// Underline type for `Battery`, different for each supported platform.
+pub trait BatteryDevice: Sized + Debug {
     fn state_of_health(&self) -> Ratio {
         self.energy_full() / self.energy_full_design()
     }
@@ -55,7 +74,7 @@ pub trait BatteryDevice: Sized {
         match self.state() {
             // In some cases energy_rate can be 0 while Charging, for example just after
             // plugging in the charger. Assume that the battery doesn't have time_to_full in such
-            // cases, to avoid divison by zero. See https://github.com/svartalf/rust-battery/pull/5
+            // cases, to avoid division by zero. See https://github.com/svartalf/rust-battery/pull/5
             State::Charging if !energy_rate.is_zero() => {
                 // Some drivers might report that `energy_full` is lower than `energy`,
                 // but battery is still charging. What should we do in that case?
@@ -95,27 +114,5 @@ pub trait BatteryDevice: Sized {
             }
             _ => None,
         }
-    }
-}
-
-/// For values in `0…1` ratio (or `0…100` %).
-///
-/// Method `bound` caps value into this range.
-pub trait Bound: Sized {
-    fn into_bounded(self) -> Self;
-}
-
-impl Bound for Ratio {
-    #[inline]
-    fn into_bounded(mut self) -> Self {
-        if self.value < 0.0 {
-            self.value = 0.0;
-        }
-
-        if self.value > 1.0 {
-            self.value = 1.0;
-        }
-
-        self
     }
 }

@@ -1,10 +1,10 @@
+use crate::Result;
 use crate::platform::traits::BatteryDevice;
 use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
 use crate::units::energy::watt_hour;
 use crate::units::power::milliwatt;
 use super::device::IoKitDevice;
 use super::traits::DataSource;
-use super::iokit::Result;
 
 /// This data source is not using uom types, because it is easier to create test suites
 /// from the `ioreg` tool output that way (which values are in mV, mA, mAh and mWh).
@@ -73,15 +73,15 @@ impl DataSource for TestDataSource {
         None
     }
 
-    fn manufacturer(&self) -> Option<String> {
+    fn manufacturer(&self) -> Option<&str> {
         None
     }
 
-    fn device_name(&self) -> Option<String> {
+    fn device_name(&self) -> Option<&str> {
         None
     }
 
-    fn serial_number(&self) -> Option<String> {
+    fn serial_number(&self) -> Option<&str> {
         None
     }
 }

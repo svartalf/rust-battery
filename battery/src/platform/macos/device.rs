@@ -5,29 +5,28 @@
 //    - ChargingCurrent
 //    - NotChargingReason (?)
 
+use std::fmt;
 use std::str;
 use std::boxed::Box;
-use std::convert::AsRef;
 use num_traits::identities::Zero;
 
-
+use crate::Result;
 use crate::units::{ElectricPotential, ThermodynamicTemperature, Time, Power, Energy};
 use crate::types::{State, Technology};
 use crate::platform::traits::BatteryDevice;
 use super::traits::DataSource;
 
-#[derive(Debug)]
 pub struct IoKitDevice {
     source: Box<dyn DataSource>,
-
-    manufacturer: Option<String>,
-    model: Option<String>,
-    serial_number: Option<String>,
 }
 
 impl IoKitDevice {
     pub fn get_mut_ref(&mut self) -> &mut dyn DataSource {
         &mut self.source
+    }
+
+    pub fn refresh(&mut self) -> Result<()> {
+        self.source.refresh()
     }
 }
 
@@ -67,15 +66,15 @@ impl BatteryDevice for IoKitDevice {
     }
 
     fn vendor(&self) -> Option<&str> {
-        self.manufacturer.as_ref().map(AsRef::as_ref)
+        self.source.manufacturer()
     }
 
     fn model(&self) -> Option<&str> {
-        self.model.as_ref().map(AsRef::as_ref)
+        self.source.device_name()
     }
 
     fn serial_number(&self) -> Option<&str> {
-        self.serial_number.as_ref().map(AsRef::as_ref)
+        self.source.serial_number()
     }
 
     fn technology(&self) -> Technology {
@@ -105,16 +104,16 @@ impl BatteryDevice for IoKitDevice {
 
 impl<T> From<T> for IoKitDevice where T: DataSource {
     fn from(ds: T) -> IoKitDevice {
-        let manufacturer = ds.manufacturer();
-        let model = ds.device_name();
-        let serial_number = ds.serial_number();
-
         IoKitDevice {
             source: Box::new(ds),
-
-            manufacturer,
-            model,
-            serial_number,
         }
+    }
+}
+
+impl fmt::Debug for IoKitDevice {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("MacOSDevice")
+            .field("source", &self.source)
+            .finish()
     }
 }

@@ -1,6 +1,8 @@
 use std::fmt;
 use std::str;
 
+use crate::Error;
+
 /// Possible battery technologies.
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum Technology {
@@ -20,7 +22,7 @@ pub enum Technology {
 }
 
 impl str::FromStr for Technology {
-    type Err = ();
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let tech = match s {
@@ -37,6 +39,7 @@ impl str::FromStr for Technology {
             _ if s.eq_ignore_ascii_case("nizn") => Technology::NickelZinc,
             _ if s.eq_ignore_ascii_case("life") => Technology::LithiumIronPhosphate,
             _ if s.eq_ignore_ascii_case("ram") => Technology::RechargeableAlkalineManganese,
+            // TODO: warn!
             _ => Technology::Unknown,
         };
 
@@ -60,5 +63,11 @@ impl fmt::Display for Technology {
         };
 
         write!(f, "{}", display)
+    }
+}
+
+impl Default for Technology {
+    fn default() -> Self {
+        Technology::Unknown
     }
 }

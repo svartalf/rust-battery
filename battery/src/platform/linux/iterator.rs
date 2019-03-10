@@ -1,56 +1,60 @@
-use std::io;
-use std::fs;
-use std::iter;
-use std::path::Path;
+use std::fmt;
+use std::fs::{self, ReadDir};
+use std::rc::Rc;
 
-use crate::Battery;
-use crate::platform::traits::BatteryIterator;
-use super::SysFsDevice;
-use super::sysfs;
+use super::{SysFsDevice, SysFsManager};
+use crate::platform::traits::*;
+use crate::Result;
 
-#[derive(Debug)]
 pub struct SysFsIterator {
-    // TODO: It is not cool to store all results at once, should keep iterator instead
-    entries: Vec<io::Result<fs::DirEntry>>,
+    #[allow(dead_code)]
+    manager: Rc<SysFsManager>,
+    entries: ReadDir,
 }
 
-impl SysFsIterator {
-    pub fn from_path<T>(root: T) -> SysFsIterator where T: AsRef<Path> {
-        let entries = match fs::read_dir(root.as_ref()) {
-            Ok(entries) => entries.collect(),
-            Err(_) => vec![],
-        };
+impl BatteryIterator for SysFsIterator {
+    type Manager = SysFsManager;
+    type Device = SysFsDevice;
 
-        SysFsIterator {
-            entries,
-        }
+    fn new(manager: Rc<Self::Manager>) -> Result<Self> {
+        let entries = fs::read_dir(manager.path())?;
+
+        Ok(SysFsIterator { manager, entries })
     }
 }
 
-impl iter::Iterator for SysFsIterator {
-    type Item = Battery;
+impl Iterator for SysFsIterator {
+    type Item = Result<<Self as BatteryIterator>::Device>;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            match self.entries.pop() {
-                None => return None, // Nothing to iterate anymore
-                Some(Err(_)) => continue, // Unable to access the sysfs somehow // TODO: trace!()
+            return match self.entries.next() {
+                None => None,
+                // Unable to access sysfs for some reasons
+                Some(Err(e)) => Some(Err(e.into())),
                 Some(Ok(entry)) => {
                     let path = entry.path();
-                    let type_ = fs::read_to_string(path.join("type"));
-                    let scope = sysfs::scope(path.join("scope"));
-                    match type_ {
-                        Ok(ref content) if content == "Battery\n" && scope == sysfs::Scope::System => {
-                            let inner = SysFsDevice::new(path);
-
-                            return Some(Battery::from(inner));
-                        },
-                        _ => continue, // it is not a battery
+                    match SysFsDevice::is_system_battery(&path) {
+                        Ok(true) => Some(SysFsDevice::try_from(path)),
+                        Ok(false) => continue,
+                        Err(e) => Some(Err(e)),
                     }
                 }
-            }
+            };
         }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.entries.size_hint()
     }
 }
 
-impl BatteryIterator for SysFsIterator {}
+impl fmt::Debug for SysFsIterator {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let (start, end) = self.size_hint();
+        f.debug_struct("LinuxIterator")
+            .field("start", &start)
+            .field("end", &end)
+            .finish()
+    }
+}
