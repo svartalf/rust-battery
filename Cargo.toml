@@ -2,7 +2,6 @@
 members = [
     "battery",
     "battery-ffi",
-    "battery-cli",
 ]
 
 [patch.crates-io]

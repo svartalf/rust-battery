@@ -25,8 +25,8 @@ Until `1.0.0` version API might change in any moment, be careful.
 
 ## Examples
 
-See full-featured `battery-cli` crate at [GitHub](https://github.com/svartalf/rust-battery/tree/master/battery-cli/)
-or at [crates.io](https://crates.rs/crate/battery-cli).
+See full-featured `battop` TUI application at [GitHub](https://github.com/svartalf/rust-battop/)
+or at [crates.io](https://crates.rs/crate/battop).
 
 For a simple example check `battery/examples/simple.rs` in the [repository](https://github.com/svartalf/rust-battery/blob/master/battery/examples/simple.rs)
 

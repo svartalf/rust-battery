@@ -15,7 +15,7 @@
 //!
 //! For a quick example see [Manager](struct.Manager.html) type or `simple.rs` file in the `examples/` folder.
 //!
-//! For a real-live example see [battery-cli](https://crates.io/crates/battery-cli) crate.
+//! For a real-live example see [battop](https://crates.io/crates/battop) crate.
 
 #![deny(unused)]
 #![deny(unstable_features)]
