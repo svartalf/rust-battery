@@ -38,3 +38,7 @@ another languages.
 
 Check its [README](https://github.com/svartalf/rust-battery/tree/master/battery-ffi)
 and [documentation](https://docs.rs/battery-ffi) for details.
+
+## Donations
+
+If you appreciate my work and want to support me, you can do it [here](https://svartalf.info/donate/)
