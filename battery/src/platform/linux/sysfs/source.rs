@@ -303,6 +303,19 @@ impl<'p> DataBuilder<'p> {
 
     fn cycle_count(&self) -> Result<Option<u32>> {
         fs::get::<u32, _>(self.root.join("cycle_count"))
+            .map(|value| {
+                // Handling zero cycles count as a non-existing value.
+                // Reason: some drivers are creating `cycle_count` with zero value
+                // even for old batteries.
+                // Since it is more often occasion than using fresh battery with zero cycles
+                // (real one this time), it is better just to ignore this value.
+                // See: https://github.com/svartalf/rust-battery/issues/23
+                match value {
+                    Some(cycles) if cycles == 0 => None,
+                    Some(cycles) => Some(cycles),
+                    None => None,
+                }
+            })
     }
 
     // Following methods are not cached in the struct

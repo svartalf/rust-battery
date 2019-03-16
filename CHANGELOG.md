@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Zero cycles count is considered as non-existing value for Linux [#23](https://github.com/svartalf/rust-battery/issues/23)
 ### Removed
 - `battery-cli` crate was yanked and replaced with `battop` crate (https://crates.io/crates/battop)
 

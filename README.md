@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/svartalf/rust-battery.svg?branch=master)](https://travis-ci.org/svartalf/rust-battery)
 [![dependency status](https://deps.rs/crate/battery/0.7.0/status.svg)](https://deps.rs/crate/battery/0.7.0)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
+[![backers](https://opencollective.com/rust-battery/tiers/backer/badge.svg?label=backer&color=brightgreen)](https://opencollective.com/rust-battery)
 
 Rust crate providing cross-platform information about batteries.
 
@@ -41,4 +42,5 @@ and [documentation](https://docs.rs/battery-ffi) for details.
 
 ## Donations
 
-If you appreciate my work and want to support me, you can do it [here](https://svartalf.info/donate/)
+If you appreciate my work and want to support me, you can do it [here](https://svartalf.info/donate/) or
+support this project at [Open Collective](https://opencollective.com/rust-battery).
