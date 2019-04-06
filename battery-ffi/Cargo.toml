@@ -13,6 +13,8 @@ license = "Apache-2.0 OR MIT"
 [badges]
 travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
 maintenance = { status = "actively-developed" }
+is-it-maintained-issue-resolution = { repository = "svartalf/rust-battery" }
+is-it-maintained-open-issues = { repository = "svartalf/rust-battery" }
 
 [lib]
 name = "battery_ffi"
