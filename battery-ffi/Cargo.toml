@@ -1,6 +1,6 @@
 [package]
 name = "battery-ffi"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "FFI bindings for battery crate"
@@ -21,9 +21,12 @@ crate-type = ["cdylib"]
 [features]
 default = ["cbindgen"]
 
+[dependencies.battery]
+version = "0.7.1"
+path = "../battery"
+
 [dependencies]
-battery = "0.7.0"
-libc = "0.2.48"
+libc = "0.2.51"
 
 [build-dependencies]
 cbindgen = { version = "0.8.0", optional = true }
