@@ -6,7 +6,7 @@ use std::rc::Rc;
 use num_traits::identities::Zero;
 use uom::si::time::{day, hour};
 
-use crate::units::{ElectricPotential, Energy, Power, Ratio, ThermodynamicTemperature, Time};
+use crate::units::{Bound, ElectricPotential, Energy, Power, Ratio, ThermodynamicTemperature, Time};
 use crate::{Result, State, Technology};
 
 pub trait BatteryManager: Debug + Sized {
@@ -33,11 +33,15 @@ pub trait BatteryIterator: Iterator<Item = Result<<Self as BatteryIterator>::Dev
 /// Underline type for `Battery`, different for each supported platform.
 pub trait BatteryDevice: Sized + Debug {
     fn state_of_health(&self) -> Ratio {
-        self.energy_full() / self.energy_full_design()
+        // It it possible to get values greater that `1.0`, which is logical nonsense,
+        // forcing the value to be in `0.0..=1.0` range
+        (self.energy_full() / self.energy_full_design()).into_bounded()
     }
 
     fn state_of_charge(&self) -> Ratio {
-        self.energy() / self.energy_full()
+        // It it possible to get values greater that `1.0`, which is logical nonsense,
+        // forcing the value to be in `0.0..=1.0` range
+        (self.energy() / self.energy_full()).into_bounded()
     }
 
     fn energy(&self) -> Energy;
