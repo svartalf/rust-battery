@@ -1,6 +1,6 @@
 [package]
 name = "battery-ffi"
-version = "0.7.1"
+version = "0.7.2" # remember to update html_root_url
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "FFI bindings for battery crate"
