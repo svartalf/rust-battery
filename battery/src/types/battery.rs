@@ -10,7 +10,7 @@ use crate::{State, Technology};
 ///
 /// Consequent calls of the same method will return the same value.\
 /// See the [Manager::refresh](struct.Manager.html#method.refresh) method,
-/// which can be used to update information holded in the current `Battery`.
+/// which can be used to update information hold in the current `Battery`.
 ///
 /// Almost all methods are returning values in the [SI measurement units](https://www.bipm.org/en/measurement-units/),
 /// represented as a units from the [uom](https://crates.io/crates/uom) crate.\

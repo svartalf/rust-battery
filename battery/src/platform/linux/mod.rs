@@ -6,3 +6,6 @@ mod sysfs;
 pub use self::device::SysFsDevice;
 pub use self::iterator::SysFsIterator;
 pub use self::manager::SysFsManager;
+
+#[cfg(test)]
+mod tests;

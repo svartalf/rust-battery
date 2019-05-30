@@ -8,6 +8,10 @@ use super::{Scope, Type};
 use crate::units::{ElectricCharge, ElectricPotential, Energy, Power};
 use crate::Result;
 
+// From the `errno.h`.
+// Easier than building whole `libc` dep.
+const ENODEV: i32 = 19;
+
 /// Read µWh value from the `energy_` file and convert into `Energy` type.
 pub fn energy<T: AsRef<Path>>(path: T) -> Result<Option<Energy>> {
     let path = path.as_ref();
@@ -87,19 +91,26 @@ pub fn scope<T: AsRef<Path>>(path: T) -> Result<Scope> {
 ///
 /// Ok(Some(value)) - file was read properly
 /// Ok(None) - file is missing
-/// Err(_) - unable to access file for some reasons (except `NotFound`)
+/// Err(_) - unable to access file for some reasons (except `NotFound` and `ENODEV`)
 pub fn get_string<T: AsRef<Path>>(path: T) -> Result<Option<String>> {
     match read_to_string(path) {
-        Ok(ref content) => {
-            // TODO: Get rid of allocation, read file only until `\n` comes
-            let trimmed = content.trim();
-            if trimmed.starts_with('\0') {
+        Ok(mut content) => {
+            if content.starts_with('\0') {
                 Err(io::Error::from(io::ErrorKind::InvalidData).into())
             } else {
-                Ok(Some(trimmed.to_string()))
+                // In-place trim
+                if content.ends_with('\n') {
+                    content.truncate(content.len() - 1);
+                }
+
+                Ok(Some(content))
             }
         }
         Err(ref e) if e.kind() == io::ErrorKind::NotFound => Ok(None),
+        // Some drivers are creating the files, but attempt to read them
+        // fails with a `ENODEV` error.
+        // See https://github.com/svartalf/rust-battery/issues/28
+        Err(ref e) if e.raw_os_error() == Some(ENODEV) => Ok(None),
         Err(e) => Err(e.into()),
     }
 }

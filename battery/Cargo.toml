@@ -1,6 +1,6 @@
 [package]
 name = "battery"
-version = "0.7.2" # remember to update html_root_url
+version = "0.7.3" # remember to update html_root_url
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "Cross-platform information about batteries"
@@ -19,7 +19,10 @@ is-it-maintained-open-issues = { repository = "svartalf/rust-battery" }
 [dependencies]
 cfg-if = "0.1"
 num-traits = { version = "0.2", default_features = false }
-uom = { version = "0.23.0", features = ["autoconvert", "f32", "si"] }
+uom = { version = "^0.23", features = ["autoconvert", "f32", "si"] }
+
+[dev-dependencies]
+tempfile = "^3.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 lazycell = "1.2.1"

@@ -40,7 +40,7 @@
 //!
 //! Also, check the `examples/` directory in the repository for examples with C and Python.
 
-#![doc(html_root_url = "https://docs.rs/battery-ffi/0.7.2")]
+#![doc(html_root_url = "https://docs.rs/battery-ffi/0.7.3")]
 
 // cbindgen==0.8.0 fails to export typedefs for opaque pointers
 // from the battery crate, if this line is missing

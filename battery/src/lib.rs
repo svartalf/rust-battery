@@ -13,14 +13,17 @@
 //!
 //! ## Examples
 //!
-//! For a quick example see [Manager](struct.Manager.html) type or `simple.rs` file in the `examples/` folder.
+//! For a quick example see the [Manager](struct.Manager.html) type documentation
+//! or [`simple.rs`](https://github.com/svartalf/rust-battery/blob/master/battery/examples/simple.rs)
+//! file in the `examples/` folder.
 //!
-//! For a real-live example see [battop](https://crates.io/crates/battop) crate.
+//! [battop](https://crates.io/crates/battop) crate is using this library as a knowledge source,
+//! so check it out too for a real-life example.
 
 #![deny(unused)]
 #![deny(unstable_features)]
 #![deny(bare_trait_objects)]
-#![doc(html_root_url = "https://docs.rs/battery/0.7.2")]
+#![doc(html_root_url = "https://docs.rs/battery/0.7.3")]
 
 #[macro_use]
 extern crate cfg_if;

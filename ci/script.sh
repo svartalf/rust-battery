@@ -4,7 +4,7 @@ set -ex
 
 cross build --target=${TARGET}
 
-if [ "${TARGET}" = "i686-unknown-freebsd" ] || [ "${TARGET}" = "x86_64-unknown-freebsd" ]; then
+if [[ "${TARGET}" = "i686-unknown-freebsd" ]] || [[ "${TARGET}" = "x86_64-unknown-freebsd" ]]; then
     echo "'cross test' command is not available for '${TARGET}' target"
 else
     cross test --target=${TARGET}

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.3] - 2019-05-30
+### Fixed
+- `ENODEV` errors for Linux are now handled the same as `ENOENT` [#28](https://github.com/svartalf/rust-battery/issues/28)
+
+### Changed
+- Relaxing `uom` dependency version to `^0.23` for `battery` crate
+- Relaxing `libc` dependency version to `^0.2` for `battery-ffi` crate
+
 ## [0.7.2] - 2019-05-21
 ### Fixed
 - `Battery::state_of_health` and `Battery::state_of_charge` are always returning values in `0.0 ≤ x ≤ 1.0` interval
