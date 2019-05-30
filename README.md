@@ -4,7 +4,7 @@
 [![Latest Version](https://docs.rs/battery/badge.svg)](https://docs.rs/battery)
 [![Build Status](https://travis-ci.org/svartalf/rust-battery.svg?branch=master)](https://travis-ci.org/svartalf/rust-battery)
 [![dependency status](https://deps.rs/crate/battery/0.7.3/status.svg)](https://deps.rs/crate/battery/0.7.3)
-[![Minimum rustc version](https://img.shields.io/badge/rustc-1.31+-yellow.svg)](https://github.com/rust-random/rand#rust-version-requirements)
+![Minimum rustc version](https://img.shields.io/badge/rustc-1.31+-yellow.svg)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
 [![backers](https://opencollective.com/rust-battery/tiers/backer/badge.svg?label=backer&color=brightgreen)](https://opencollective.com/rust-battery)
 
