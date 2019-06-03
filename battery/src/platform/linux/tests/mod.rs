@@ -20,3 +20,4 @@ macro_rules! sysfs_test_suite {
 }
 
 mod issue_28;
+mod issue_30;

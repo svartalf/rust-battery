@@ -180,7 +180,7 @@ impl<'p> DataBuilder<'p> {
                 Ok(Some(value)) => Ok(value),
                 Ok(None) => match fs::charge(self.root.join("charge_full_design")) {
                     Ok(Some(value)) => Ok(value * *self.design_voltage()?),
-                    Ok(None) => Ok(*self.energy_full_design()?),
+                    Ok(None) => Err(Error::not_found("Unable to determine the `energy_full_design` value")),
                     Err(e) => Err(e),
                 },
                 Err(e) => Err(e),
