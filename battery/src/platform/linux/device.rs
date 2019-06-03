@@ -1,9 +1,10 @@
+use std::io;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
 use crate::platform::traits::*;
 use crate::units::{ElectricPotential, Energy, Power, Ratio, ThermodynamicTemperature};
-use crate::{Result, State, Technology};
+use crate::{Result, Error, State, Technology};
 
 use super::sysfs::{fs, DataBuilder, InstantData, Scope, Type};
 
@@ -50,9 +51,23 @@ impl SysFsDevice {
     }
 
     pub fn refresh(&mut self) -> Result<()> {
-        let builder = DataBuilder::new(&self.root);
-        self.source = builder.collect()?;
-        Ok(())
+        // It is necessary to ensure that `self.root`
+        // still exists and accessible.
+        // See https://github.com/svartalf/rust-battery/issues/29
+        if self.root.is_dir() {
+            let builder = DataBuilder::new(&self.root);
+            self.source = builder.collect()?;
+
+            Ok(())
+        } else {
+            let inner = io::Error::from(io::ErrorKind::NotFound);
+            let e = Error::new(
+                inner,
+                format!("Device directory `{:?}` is missing", self.root),
+            );
+
+            Err(e)
+        }
     }
 }
 

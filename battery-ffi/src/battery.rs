@@ -155,13 +155,13 @@ pub unsafe extern "C" fn battery_get_temperature(ptr: *const Battery) -> libc::c
 ///
 /// # Returns
 ///
-/// If value is not available, function returns max possible value for `uint32` type (`4294967295`).
+/// If value is not available, function returns max possible value for the `u32` type (`4294967295`).
 ///
 /// # Panics
 ///
 /// This function will panic if passed pointer is `NULL`
 #[no_mangle]
-pub unsafe extern "C" fn battery_get_cycle_count(ptr: *const Battery) -> libc::uint32_t {
+pub unsafe extern "C" fn battery_get_cycle_count(ptr: *const Battery) -> u32 {
     assert!(!ptr.is_null());
     let battery = &*ptr;
 

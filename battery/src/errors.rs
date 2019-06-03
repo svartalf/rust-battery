@@ -1,5 +1,6 @@
 //! Errors handling
-//!
+
+use std::borrow::Cow;
 use std::error::Error as StdError;
 use std::fmt;
 use std::io;
@@ -15,21 +16,31 @@ pub type Result<T> = result::Result<T, Error>;
 #[derive(Debug)]
 pub struct Error {
     source: io::Error,
-    description: Option<&'static str>,
+    description: Option<Cow<'static, str>>,
 }
 
 impl Error {
-    pub fn not_found(description: &'static str) -> Error {
+    #[allow(unused)]
+    pub(crate) fn new<T>(e: io::Error, description: T) -> Error where T: Into<Cow<'static, str>> {
         Error {
-            source: io::Error::from(io::ErrorKind::NotFound),
-            description: Some(description),
+            source: e,
+            description: Some(description.into()),
         }
     }
 
-    pub fn invalid_data(description: &'static str) -> Error {
+    #[allow(unused)]
+    pub(crate) fn not_found<T>(description: T) -> Error where T: Into<Cow<'static, str>> {
+        Error {
+            source: io::Error::from(io::ErrorKind::NotFound),
+            description: Some(description.into()),
+        }
+    }
+
+    #[allow(unused)]
+    pub(crate) fn invalid_data<T>(description: T) -> Error where T: Into<Cow<'static, str>> {
         Error {
             source: io::Error::from(io::ErrorKind::InvalidData),
-            description: Some(description),
+            description: Some(description.into()),
         }
     }
 }
@@ -42,7 +53,7 @@ impl StdError for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.description {
+        match &self.description {
             Some(desc) => write!(f, "{}", desc),
             None => self.source.fmt(f),
         }
@@ -69,19 +80,19 @@ mod nix_impl {
             match e {
                 nix::Error::Sys(errno) => Error {
                     source: io::Error::from_raw_os_error(errno as i32),
-                    description: Some(errno.desc()),
+                    description: Some(errno.desc().into()),
                 },
                 nix::Error::InvalidPath => Error {
                     source: io::Error::new(io::ErrorKind::InvalidInput, e),
-                    description: Some("Invalid path"),
+                    description: Some("Invalid path".into()),
                 },
                 nix::Error::InvalidUtf8 => Error {
                     source: io::Error::new(io::ErrorKind::InvalidData, e),
-                    description: Some("Invalid UTF-8 string"),
+                    description: Some("Invalid UTF-8 string".into()),
                 },
                 nix::Error::UnsupportedOperation => Error {
                     source: io::Error::new(io::ErrorKind::Other, e),
-                    description: Some("Unsupported operation"),
+                    description: Some("Unsupported operation".into()),
                 },
             }
         }
