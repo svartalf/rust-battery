@@ -21,7 +21,10 @@ pub struct Error {
 
 impl Error {
     #[allow(unused)]
-    pub(crate) fn new<T>(e: io::Error, description: T) -> Error where T: Into<Cow<'static, str>> {
+    pub(crate) fn new<T>(e: io::Error, description: T) -> Error
+    where
+        T: Into<Cow<'static, str>>,
+    {
         Error {
             source: e,
             description: Some(description.into()),
@@ -29,7 +32,10 @@ impl Error {
     }
 
     #[allow(unused)]
-    pub(crate) fn not_found<T>(description: T) -> Error where T: Into<Cow<'static, str>> {
+    pub(crate) fn not_found<T>(description: T) -> Error
+    where
+        T: Into<Cow<'static, str>>,
+    {
         Error {
             source: io::Error::from(io::ErrorKind::NotFound),
             description: Some(description.into()),
@@ -37,7 +43,10 @@ impl Error {
     }
 
     #[allow(unused)]
-    pub(crate) fn invalid_data<T>(description: T) -> Error where T: Into<Cow<'static, str>> {
+    pub(crate) fn invalid_data<T>(description: T) -> Error
+    where
+        T: Into<Cow<'static, str>>,
+    {
         Error {
             source: io::Error::from(io::ErrorKind::InvalidData),
             description: Some(description.into()),

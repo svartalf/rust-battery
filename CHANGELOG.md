@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.4] - 2019-06-03
+### Fixed
+- `Manager::refresh` method in Linux implementation checks if battery folder is exists [#29](https://github.com/svartalf/rust-battery/issues/29)
+- `Battery::energy_full_design` is not falling into a infinite recursion anymore [#30](https://github.com/svartalf/rust-battery/issues/30)
+
 ## [0.7.3] - 2019-05-30
 ### Fixed
 - `ENODEV` errors for Linux are now handled the same as `ENOENT` [#28](https://github.com/svartalf/rust-battery/issues/28)

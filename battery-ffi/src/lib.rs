@@ -40,7 +40,7 @@
 //!
 //! Also, check the `examples/` directory in the repository for examples with C and Python.
 
-#![doc(html_root_url = "https://docs.rs/battery-ffi/0.7.3")]
+#![doc(html_root_url = "https://docs.rs/battery-ffi/0.7.4")]
 
 // cbindgen==0.8.0 fails to export typedefs for opaque pointers
 // from the battery crate, if this line is missing
@@ -72,7 +72,7 @@ pub type Batteries = battery_lib::Batteries;
 pub type Battery = battery_lib::Battery;
 
 pub use self::battery::*;
-pub use self::errors::{battery_last_error_length, battery_last_error_message};
+pub use self::errors::{battery_have_last_error, battery_last_error_length, battery_last_error_message};
 pub use self::iterator::*;
 pub use self::manager::*;
 pub use self::state::*;

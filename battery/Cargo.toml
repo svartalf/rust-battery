@@ -1,6 +1,6 @@
 [package]
 name = "battery"
-version = "0.7.3" # remember to update html_root_url
+version = "0.7.4" # remember to update html_root_url
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "Cross-platform information about batteries"
