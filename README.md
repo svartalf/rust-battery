@@ -6,7 +6,8 @@
 [![dependency status](https://deps.rs/crate/battery/0.7.4/status.svg)](https://deps.rs/crate/battery/0.7.4)
 ![Minimum rustc version](https://img.shields.io/badge/rustc-1.31+-yellow.svg)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
-[![backers](https://opencollective.com/rust-battery/tiers/backer/badge.svg?label=backer&color=brightgreen)](https://opencollective.com/rust-battery)
+[![Backers on Open Collective](https://opencollective.com/rust-battery/backers/badge.svg)](#backers) 
+[![Sponsors on Open Collective](https://opencollective.com/rust-battery/sponsors/badge.svg)](#sponsors) 
 
 Rust crate providing cross-platform information about the notebook batteries.
 
@@ -50,3 +51,33 @@ and [documentation](https://docs.rs/battery-ffi) for details.
 
 If you appreciate my work and want to support me, you can do it [here](https://svartalf.info/donate/) or
 support this project at [Open Collective](https://opencollective.com/rust-battery).
+
+## Contributors
+
+This project exists thanks to all the people who contribute. 
+<a href="https://github.com/svartalf/rust-battery/graphs/contributors"><img src="https://opencollective.com/rust-battery/contributors.svg?width=890&button=false" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/rust-battery#backer)]
+
+<a href="https://opencollective.com/rust-battery#backers" target="_blank"><img src="https://opencollective.com/rust-battery/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/rust-battery#sponsor)]
+
+<a href="https://opencollective.com/rust-battery/sponsor/0/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/1/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/2/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/3/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/4/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/5/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/6/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/7/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/8/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/rust-battery/sponsor/9/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/9/avatar.svg"></a>
+
+
