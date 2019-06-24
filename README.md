@@ -17,7 +17,7 @@
  * [Supported platforms](#supported-platforms)
  * [Install](#install)
  * [Examples](#examples)
- * [FFI interface](#ffi-interface)
+ * [FFI bindings](#ffi-bindings)
  * [Users](#users)
  * [License](#license)
  * [Donations](#donations)
@@ -29,8 +29,8 @@
 
 `battery` provides a cross-platform unified API to a notebook batteries state.
 
-It's main goal is to wrap the OS-specific interfaces, cover all the hacks and legacy cases and get
-the batteries information (such as state of charge, energy rate, voltage and temperature)
+Its main goal is to wrap the OS-specific interfaces, cover all the hacks and legacy cases
+and get the batteries information (such as state of charge, energy rate, voltage and temperature)
 as a typed values, recalculated as necessary to be returned as a [SI measurement units](https://www.bipm.org/en/measurement-units/).
 
 ## Supported platforms
@@ -67,10 +67,10 @@ for battery in manager.batteries()? {
 See the `battery/examples/` folder in the [repository](https://github.com/svartalf/rust-battery/blob/master/battery/examples/simple.rs)
 for additional examples.
 
-## FFI interface
+## FFI bindings
 
 Experimental [battery-ffi](https://crates.io/crates/battery-ffi) crate provides the FFI bindings to the `battery` crate,
-so it can be used with another languages, such as C, Python or NodeJS.
+so it can be used with other languages, such as C, Python or NodeJS.
 
 Check its [README](https://github.com/svartalf/rust-battery/tree/master/battery-ffi)
 and [documentation](https://docs.rs/battery-ffi) for details.
@@ -92,7 +92,7 @@ It is using the `battery` crate API to show the batteries information in your te
 and extremely customizable prompt Spaceship ZSH.\
 It is using the `battery` crate to show the the current battery level and status in a shell prompt.
 
-Check out what @matchai says:
+Here is what [@matchai](https://github.com/matchai) says:
 
 > I really appreciate how easily we were able to get your library up and running!
 > Battery APIs were a headache for us in predecessors of this project 😅
@@ -137,5 +137,3 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/rust-battery/sponsor/7/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/rust-battery/sponsor/8/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/rust-battery/sponsor/9/website" target="_blank"><img src="https://opencollective.com/rust-battery/sponsor/9/avatar.svg"></a>
-
-
