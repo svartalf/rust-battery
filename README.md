@@ -6,13 +6,32 @@
 [![dependency status](https://deps.rs/crate/battery/0.7.4/status.svg)](https://deps.rs/crate/battery/0.7.4)
 ![Minimum rustc version](https://img.shields.io/badge/rustc-1.31+-yellow.svg)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
-[![Backers on Open Collective](https://opencollective.com/rust-battery/backers/badge.svg)](#backers) 
-[![Sponsors on Open Collective](https://opencollective.com/rust-battery/sponsors/badge.svg)](#sponsors) 
+[![Backers on Open Collective](https://opencollective.com/rust-battery/backers/badge.svg)](#backers)
+[![Sponsors on Open Collective](https://opencollective.com/rust-battery/sponsors/badge.svg)](#sponsors)
 
-Rust crate providing cross-platform information about the notebook batteries.
+> Rust crate providing cross-platform information about the notebook batteries.
 
-Gives access to a system independent battery state, capacity, charge and voltage values
-recalculated as necessary to be returned [SI measurement units](https://www.bipm.org/en/measurement-units/).
+## Table of contents
+
+ * [Overview](#overview)
+ * [Supported platforms](#supported-platforms)
+ * [Install](#install)
+ * [Examples](#examples)
+ * [FFI interface](#ffi-interface)
+ * [Users](#users)
+ * [License](#license)
+ * [Donations](#donations)
+ * [Contributors](#contributors)
+ * [Backers](#backers)
+ * [Sponsors](#sponsors)
+
+## Overview
+
+`battery` provides a cross-platform unified API to a notebook batteries state.
+
+It's main goal is to wrap the OS-specific interfaces, cover all the hacks and legacy cases and get
+the batteries information (such as state of charge, energy rate, voltage and temperature)
+as a typed values, recalculated as necessary to be returned as a [SI measurement units](https://www.bipm.org/en/measurement-units/).
 
 ## Supported platforms
 
@@ -22,30 +41,71 @@ recalculated as necessary to be returned [SI measurement units](https://www.bipm
 * FreeBSD
 * DragonFlyBSD
 
-# API stability
+## Install
 
-Until `1.0.0` version API might change in any moment, be careful.
+As a prerequisite, `battery` crate requires at least version **1.31** or greater.
 
-# Rust version requirements
+Add the following line into a `Cargo.toml`:
 
-Both `battery` and `battery-ffi` crates are requiring at least Rustc version **1.31** or greater.
+```toml
+battery = "0.7.4"
+```
 
 ## Examples
 
-See the full-featured `battop` TUI application at [GitHub](https://github.com/svartalf/rust-battop/)
-or at [crates.io](https://crates.io/crate/battop).
+```rust
+let manager = battery::Manager::new()?;
 
-For a simple example check out the `battery/examples/simple.rs`
-in the [repository](https://github.com/svartalf/rust-battery/blob/master/battery/examples/simple.rs)
+for battery in manager.batteries()? {
+    println!("Vendor: {:?}", battery.vendor());
+    println!("Model: {:?}", battery.model());
+    println!("State: {:?}", battery.state());
+    println!("Time to full charge: {:?}", battery.time_to_charge());
+}
+```
 
-## FFI
+See the `battery/examples/` folder in the [repository](https://github.com/svartalf/rust-battery/blob/master/battery/examples/simple.rs)
+for additional examples.
 
-Experimental [battery-ffi](https://crates.io/crates/battery-ffi) crate
-provides the FFI bindings to the `battery` crate, so it can be used with
-another languages.
+## FFI interface
+
+Experimental [battery-ffi](https://crates.io/crates/battery-ffi) crate provides the FFI bindings to the `battery` crate,
+so it can be used with another languages, such as C, Python or NodeJS.
 
 Check its [README](https://github.com/svartalf/rust-battery/tree/master/battery-ffi)
 and [documentation](https://docs.rs/battery-ffi) for details.
+
+## Users
+
+This an incomplete list of the `battery` crate users. If you are using it too,
+send me a message and I'll add your project here!
+
+### battop
+
+[`battop`](https://github.com/svartalf/rust-battop) is an interactive viewer,
+similar to `top`, `htop` and other \*top utilities, but about the batteries installed in your notebook.\
+It is using the `battery` crate API to show the batteries information in your terminal.
+
+### starship
+
+[`starship`](https://github.com/starship/starship) is a Rust port of the minimalistic, powerful,
+and extremely customizable prompt Spaceship ZSH.\
+It is using the `battery` crate to show the the current battery level and status in a shell prompt.
+
+Check out what @matchai says:
+
+> I really appreciate how easily we were able to get your library up and running!
+> Battery APIs were a headache for us in predecessors of this project 😅
+
+And there is [this tweet](https://twitter.com/matchai/status/1135906726392283136) also!
+
+## License
+
+Licensed under either of [Apache License 2.0](https://github.com/svartalf/rust-battery/blob/master/LICENSE-APACHE)
+or [MIT license](https://github.com/svartalf/rust-battery/blob/master/LICENSE-MIT) at your option.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you,
+as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
 ## Donations
 
@@ -54,16 +114,14 @@ support this project at [Open Collective](https://opencollective.com/rust-batter
 
 ## Contributors
 
-This project exists thanks to all the people who contribute. 
+This project exists thanks to all the people who contribute.
 <a href="https://github.com/svartalf/rust-battery/graphs/contributors"><img src="https://opencollective.com/rust-battery/contributors.svg?width=890&button=false" /></a>
-
 
 ## Backers
 
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/rust-battery#backer)]
 
 <a href="https://opencollective.com/rust-battery#backers" target="_blank"><img src="https://opencollective.com/rust-battery/backers.svg?width=890"></a>
-
 
 ## Sponsors
 
