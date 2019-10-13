@@ -30,9 +30,7 @@ impl Manager {
     pub fn new() -> Result<Manager> {
         let inner = PlatformManager::new()?;
 
-        Ok(Manager {
-            inner: Rc::new(inner),
-        })
+        Ok(Manager { inner: Rc::new(inner) })
     }
 
     /// Gets an iterator over available [batteries](struct.Battery.html).

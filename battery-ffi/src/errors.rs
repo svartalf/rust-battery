@@ -4,7 +4,7 @@ use std::ptr;
 use std::slice;
 
 thread_local! {
-    static LAST_ERROR: RefCell<Option<Box<Error>>> = RefCell::new(None);
+    static LAST_ERROR: RefCell<Option<Box<dyn Error>>> = RefCell::new(None);
 }
 
 pub fn set_last_error<E: Error + 'static>(err: E) {
@@ -13,7 +13,7 @@ pub fn set_last_error<E: Error + 'static>(err: E) {
     });
 }
 
-pub fn take_last_error() -> Option<Box<Error>> {
+pub fn take_last_error() -> Option<Box<dyn Error>> {
     LAST_ERROR.with(|prev| prev.borrow_mut().take())
 }
 

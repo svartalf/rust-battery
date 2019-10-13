@@ -46,5 +46,5 @@ pub unsafe extern "C" fn battery_iterator_free(ptr: *mut Batteries) {
         return;
     }
 
-    Box::from_raw(ptr);
+    let _ = Box::from_raw(ptr);
 }

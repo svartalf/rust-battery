@@ -2,7 +2,7 @@
 /// `/sys/class/power_supply/{name}/*` directory contents.
 macro_rules! sysfs_test_suite {
     ( $( $name:expr => $value:expr ),* ) => {{
-        use ::std::io::Write as _;
+        use ::std::io::Write;
 
         let root = tempfile::tempdir().unwrap();
 

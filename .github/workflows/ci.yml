@@ -1,0 +1,126 @@
+on: [push, pull_request]
+
+name: Continuous integration
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - 1.32.0  # MSRV
+        arch:
+          - i686-unknown-linux-gnu
+          - x86_64-unknown-linux-gnu
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.arch }}
+          override: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --target ${{ matrix.arch }}
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: test
+          args: --target ${{ matrix.arch }}
+
+      - name: Run clippy
+        if: matrix.toolchain == 'stable'
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: clippy
+          args: --target ${{ matrix.arch }} -- -D warnings
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - 1.32.0  # MSRV
+        arch:
+          - i686-pc-windows-msvc
+          - x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.arch }}
+          override: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --target ${{ matrix.arch }}
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: test
+          args: --target ${{ matrix.arch }}
+
+      - name: Run clippy
+        if: matrix.toolchain == 'stable'
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: clippy
+          args: --target ${{ matrix.arch }} -- -D warnings
+
+  macos:
+    name: macOS
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - 1.32.0  # MSRV
+        arch:
+          - x86_64-apple-darwin
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.arch }}
+          override: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --target ${{ matrix.arch }}
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: test
+          args: --target ${{ matrix.arch }}
+
+      - name: Run clippy
+        if: matrix.toolchain == 'stable'
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: clippy
+          args: --target ${{ matrix.arch }} -- -D warnings
