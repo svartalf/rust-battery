@@ -19,7 +19,7 @@ is-it-maintained-open-issues = { repository = "svartalf/rust-battery" }
 [dependencies]
 cfg-if = "0.1"
 num-traits = { version = "0.2", default_features = false }
-uom = { version = "^0.23", features = ["autoconvert", "f32", "si"] }
+uom = { version = "^0.25", features = ["autoconvert", "f32", "si"] }
 
 [dev-dependencies]
 tempfile = "^3.0"
