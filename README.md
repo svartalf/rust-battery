@@ -2,7 +2,7 @@
 
 [![Latest Version](https://img.shields.io/crates/v/battery.svg)](https://crates.io/crates/battery)
 [![Latest Version](https://docs.rs/battery/badge.svg)](https://docs.rs/battery)
-[![dependency status](https://deps.rs/crate/battery/0.7.4/status.svg)](https://deps.rs/crate/battery/0.7.4)
+[![dependency status](https://deps.rs/crate/battery/0.7.5/status.svg)](https://deps.rs/crate/battery/0.7.5)
 [![Build Status](https://github.com/svartalf/rust-battery/workflows/Continuous%20integration/badge.svg)](https://github.com/svartalf/rust-battery/actions?workflow=Continuous+integration)
 ![Minimum rustc version](https://img.shields.io/badge/rustc-1.32+-yellow.svg)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
@@ -49,7 +49,7 @@ Add the following line into a `Cargo.toml`:
 
 ```toml
 [dependencies]
-battery = "0.7.4"
+battery = "0.7.5"
 ```
 
 ## Examples

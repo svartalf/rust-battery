@@ -1,6 +1,6 @@
 [package]
 name = "battery-ffi"
-version = "0.7.4" # remember to update html_root_url
+version = "0.7.5" # remember to update html_root_url
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "FFI bindings for battery crate"
@@ -24,7 +24,7 @@ crate-type = ["cdylib"]
 default = ["cbindgen"]
 
 [dependencies.battery]
-version = "0.7.4"
+version = "^0.7"
 path = "../battery"
 
 [dependencies]

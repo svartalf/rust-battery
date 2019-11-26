@@ -23,7 +23,7 @@
 #![deny(unused)]
 #![deny(unstable_features)]
 #![deny(bare_trait_objects)]
-#![doc(html_root_url = "https://docs.rs/battery/0.7.4")]
+#![doc(html_root_url = "https://docs.rs/battery/0.7.5")]
 
 #[macro_use]
 extern crate cfg_if;
