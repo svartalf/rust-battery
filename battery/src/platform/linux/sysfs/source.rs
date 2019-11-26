@@ -173,14 +173,18 @@ impl<'p> DataBuilder<'p> {
     }
 
     fn energy_full_design(&self) -> Result<&Energy> {
-        // Based on the `upower` source it seems to impossible not to have any of needed files,
-        // so fallback to `0 mWh` was removed, error will be propagated instead.
         self.energy_full_design.try_borrow_with(|| {
             match fs::energy(self.root.join("energy_full_design")) {
                 Ok(Some(value)) => Ok(value),
                 Ok(None) => match fs::charge(self.root.join("charge_full_design")) {
                     Ok(Some(value)) => Ok(value * *self.design_voltage()?),
-                    Ok(None) => Err(Error::not_found("Unable to determine the `energy_full_design` value")),
+                    // It is possible that both `energy_full_design` and `charge_full_design`
+                    // files might be missing, see #40.
+                    // As a workaround, doing the same what `upower` does - falling back to zero value
+                    // It will affect other parameters calculation,
+                    // and in a future versions this function probably should return
+                    // `Result<Option<Energy>>` instead to mark missing value.
+                    Ok(None) => Ok(microwatt_hour!(0.0)),
                     Err(e) => Err(e),
                 },
                 Err(e) => Err(e),

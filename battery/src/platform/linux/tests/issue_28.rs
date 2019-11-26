@@ -1,6 +1,10 @@
 use std::fs;
 
+use approx::assert_abs_diff_eq;
+
+use crate::{State, Technology};
 use super::super::SysFsDevice;
+use crate::platform::traits::BatteryDevice;
 
 // https://github.com/svartalf/rust-battery/issues/28
 //
@@ -33,6 +37,22 @@ fn test_issue_28() {
     let device = SysFsDevice::try_from(path.clone());
 
     assert!(device.is_ok());
+    let device = device.unwrap();
+
+    assert_eq!(device.state(), State::Discharging);
+    assert_eq!(device.technology(), Technology::LithiumIon);
+    assert!(device.temperature().is_none());
+    assert_eq!(device.cycle_count(), None);
+    assert_eq!(device.vendor(), Some("Hewlett-Packard"));
+    assert_eq!(device.model(), Some("PABAS0241231"));
+    assert_eq!(device.serial_number(), Some("41167"));
+    assert_abs_diff_eq!(device.state_of_health().value, 0.9511111);
+    assert_abs_diff_eq!(device.state_of_charge().value, 0.21);
+    assert_abs_diff_eq!(device.energy().value, 29753.998);
+    assert_abs_diff_eq!(device.energy_full().value, 140520.95);
+    assert_abs_diff_eq!(device.energy_full_design().value, 147744.0);
+    assert_abs_diff_eq!(device.energy_rate().value, 0.0);
+    assert_abs_diff_eq!(device.voltage().value, 10.663);
 
     fs::remove_dir_all(path).unwrap();
 }
