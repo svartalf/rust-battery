@@ -40,4 +40,3 @@ libc = "^0.2"
 [dev-dependencies]
 tempfile = "^3.0"
 approx = "0.3.2"
-version-sync = "^0.8"
