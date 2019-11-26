@@ -59,6 +59,9 @@ impl IoObject {
     /// untyped dict here.
     pub fn properties(&self) -> Result<CFDictionary<CFString, CFType>> {
         unsafe {
+            // MSRV is 1.32 and `std::mem::MaybeUninit` appeared only at 1.36
+            // TODO: Switch to `MaybeUninit` as soon as MSRV will be bumped.
+            #[allow(deprecated)]
             let mut props: CFMutableDictionaryRef = mem::uninitialized();
 
             kern_try!(sys::IORegistryEntryCreateCFProperties(self.0, &mut props,

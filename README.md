@@ -42,11 +42,12 @@ as a typed values, recalculated as necessary to be returned as a [SI measurement
 
 ## Install
 
-As a prerequisite, `battery` crate requires at least Rustc version **1.31** or greater.
+As a prerequisite, `battery` crate requires at least Rustc version **1.32** or greater.
 
 Add the following line into a `Cargo.toml`:
 
 ```toml
+[dependencies]
 battery = "0.7.4"
 ```
 

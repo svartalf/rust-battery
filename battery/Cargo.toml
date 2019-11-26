@@ -1,6 +1,6 @@
 [package]
 name = "battery"
-version = "0.7.4" # remember to update html_root_url
+version = "0.7.4"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 description = "Cross-platform information about the notebook batteries"
@@ -9,6 +9,7 @@ readme = "README.md"
 categories = ["os"]
 keywords = ["battery", "linux", "macos", "windows", "freebsd"]
 license = "Apache-2.0 OR MIT"
+build = "build.rs"
 
 [badges]
 travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
@@ -39,3 +40,4 @@ libc = "^0.2"
 [dev-dependencies]
 tempfile = "^3.0"
 approx = "0.3.2"
+version-sync = "^0.8"
