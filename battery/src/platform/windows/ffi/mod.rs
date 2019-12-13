@@ -1,18 +1,18 @@
 #![allow(clippy::cast_ptr_alignment)]
 
-use std::io;
-use std::mem;
-use std::iter;
-use std::ops::DerefMut;
 use std::default::Default;
+use std::io;
+use std::iter;
+use std::mem;
+use std::ops::DerefMut;
 
 use winapi::ctypes;
-use winapi::shared::{devguid, ntdef, windef, minwindef, winerror, basetsd};
-use winapi::um::{setupapi, handleapi, errhandlingapi, winbase, minwinbase, fileapi, winnt, ioapiset};
+use winapi::shared::{basetsd, devguid, minwindef, ntdef, windef, winerror};
+use winapi::um::{errhandlingapi, fileapi, handleapi, ioapiset, minwinbase, setupapi, winbase, winnt};
 
 mod ioctl;
-mod wrappers;
 mod wide_string;
+mod wrappers;
 
 pub(crate) use self::ioctl::BatteryQueryInformation;
 use self::wide_string::WideString;
@@ -20,9 +20,7 @@ use self::wrappers::*;
 
 #[inline]
 fn get_last_error() -> io::Error {
-    let error_type = unsafe {
-        errhandlingapi::GetLastError()
-    };
+    let error_type = unsafe { errhandlingapi::GetLastError() };
     io::Error::from_raw_os_error(error_type as i32)
 }
 
@@ -66,15 +64,10 @@ impl DeviceIterator {
         };
 
         // TODO: Add trace
-        if result == 0 {
-            Err(get_last_error())
-        } else {
-            Ok(data)
-        }
+        if result == 0 { Err(get_last_error()) } else { Ok(data) }
     }
 
-    fn get_interface_detail(&self, data: &mut setupapi::SP_DEVICE_INTERFACE_DATA)
-            -> io::Result<InterfaceDetailData> {
+    fn get_interface_detail(&self, data: &mut setupapi::SP_DEVICE_INTERFACE_DATA) -> io::Result<InterfaceDetailData> {
         let mut buf_size: minwindef::DWORD = 0;
         unsafe {
             setupapi::SetupDiGetDeviceInterfaceDetailW(
@@ -88,7 +81,7 @@ impl DeviceIterator {
         };
         let result = unsafe { errhandlingapi::GetLastError() };
         if result != winerror::ERROR_INSUFFICIENT_BUFFER {
-            return Err(io::Error::from_raw_os_error(result as i32))
+            return Err(io::Error::from_raw_os_error(result as i32));
         }
 
         let mut pdidd = unsafe {
@@ -110,16 +103,14 @@ impl DeviceIterator {
         };
         let result = unsafe { errhandlingapi::GetLastError() };
         if result != 0 {
-            return Err(io::Error::from_raw_os_error(result as i32))
+            return Err(io::Error::from_raw_os_error(result as i32));
         }
 
         Ok(pdidd.into())
     }
 
     fn get_handle(&self, pdidd: &InterfaceDetailData) -> io::Result<Handle> {
-        let device_path = unsafe {
-            (***pdidd).DevicePath.as_ptr()
-        };
+        let device_path = unsafe { (***pdidd).DevicePath.as_ptr() };
         let file = unsafe {
             fileapi::CreateFileW(
                 device_path,
@@ -169,7 +160,6 @@ impl DeviceIterator {
 
         self.get_handle(&interface_detail_data)
     }
-
 }
 
 impl iter::Iterator for DeviceIterator {
@@ -183,15 +173,13 @@ impl iter::Iterator for DeviceIterator {
 
         let tag = match self.get_tag(&mut handle) {
             Ok(tag) => tag,
-            Err(_) => {
-                return None
-            }
+            Err(_) => return None,
         };
 
         self.current += 1;
 
         Some(DeviceHandle {
-//            interface_details: interface_detail_data,
+            //            interface_details: interface_detail_data,
             handle: handle,
             tag: tag,
         })
@@ -200,18 +188,15 @@ impl iter::Iterator for DeviceIterator {
 
 impl Drop for DeviceIterator {
     fn drop(&mut self) {
-        let res = unsafe {
-            setupapi::SetupDiDestroyDeviceInfoList(self.device)
-        };
+        let res = unsafe { setupapi::SetupDiDestroyDeviceInfoList(self.device) };
         debug_assert_eq!(res, 1, "Unable to destroy DeviceInfoList");
     }
 }
 
-
 // Our inner representation of the battery device.
 #[derive(Debug)]
 pub struct DeviceHandle {
-//    interface_details: InterfaceDetailData,
+    //    interface_details: InterfaceDetailData,
     pub handle: Handle,
     // TODO: Carry only `.BatteryTag` field ?
     pub tag: ioctl::BatteryQueryInformation,
@@ -240,11 +225,7 @@ impl DeviceHandle {
             )
         };
 
-        if res == 0 {
-            Err(get_last_error())
-        } else {
-            Ok(out)
-        }
+        if res == 0 { Err(get_last_error()) } else { Ok(out) }
     }
 
     pub fn status(&mut self) -> io::Result<ioctl::BatteryStatus> {
@@ -269,11 +250,7 @@ impl DeviceHandle {
             )
         };
 
-        if res == 0 {
-            Err(get_last_error())
-        } else {
-            Ok(out)
-        }
+        if res == 0 { Err(get_last_error()) } else { Ok(out) }
     }
 
     // 10ths of a degree Kelvin (or decikelvin)
@@ -300,11 +277,7 @@ impl DeviceHandle {
             )
         };
 
-        if res == 0 {
-            Err(get_last_error())
-        } else {
-            Ok(out)
-        }
+        if res == 0 { Err(get_last_error()) } else { Ok(out) }
     }
 
     pub fn device_name(&mut self) -> io::Result<String> {

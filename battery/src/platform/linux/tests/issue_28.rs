@@ -2,9 +2,9 @@ use std::fs;
 
 use approx::assert_abs_diff_eq;
 
-use crate::{State, Technology};
 use super::super::SysFsDevice;
 use crate::platform::traits::BatteryDevice;
+use crate::{State, Technology};
 
 // https://github.com/svartalf/rust-battery/issues/28
 //

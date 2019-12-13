@@ -2,13 +2,13 @@
 
 #![allow(non_snake_case)]
 
+use std::default::Default;
 use std::mem;
 use std::ops;
-use std::default::Default;
 
-use winapi::shared::{ntdef};
+use winapi::shared::ntdef;
 
-STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_WAIT_STATUS {
+STRUCT! {#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_WAIT_STATUS {
     BatteryTag: ntdef::ULONG,
     Timeout: ntdef::ULONG,
     PowerState: ntdef::ULONG,
@@ -19,9 +19,7 @@ STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct B
 impl Default for BATTERY_WAIT_STATUS {
     #[inline]
     fn default() -> Self {
-        unsafe {
-            mem::zeroed()
-        }
+        unsafe { mem::zeroed() }
     }
 }
 

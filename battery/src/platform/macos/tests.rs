@@ -1,10 +1,10 @@
-use crate::Result;
-use crate::platform::traits::BatteryDevice;
-use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
-use crate::units::energy::watt_hour;
-use crate::units::power::milliwatt;
 use super::device::IoKitDevice;
 use super::traits::DataSource;
+use crate::platform::traits::BatteryDevice;
+use crate::units::energy::watt_hour;
+use crate::units::power::milliwatt;
+use crate::units::{ElectricCharge, ElectricCurrent, ElectricPotential, ThermodynamicTemperature, Time};
+use crate::Result;
 
 /// This data source is not using uom types, because it is easier to create test suites
 /// from the `ioreg` tool output that way (which values are in mV, mA, mAh and mWh).
@@ -60,9 +60,7 @@ impl DataSource for TestDataSource {
     }
 
     fn temperature(&self) -> Option<ThermodynamicTemperature> {
-        self.temperature.map(|value| {
-            celsius!(value)
-        })
+        self.temperature.map(|value| celsius!(value))
     }
 
     fn cycle_count(&self) -> Option<u32> {

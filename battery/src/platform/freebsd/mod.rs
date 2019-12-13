@@ -1,10 +1,10 @@
 // DragonflyBSD also!
 
-mod manager;
-mod iterator;
-mod device;
 mod acpi;
+mod device;
+mod iterator;
+mod manager;
 
-pub use self::manager::IoCtlManager;
-pub use self::iterator::IoCtlIterator;
 pub use self::device::IoCtlDevice;
+pub use self::iterator::IoCtlIterator;
+pub use self::manager::IoCtlManager;

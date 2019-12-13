@@ -1,18 +1,18 @@
 #![allow(clippy::redundant_static_lifetimes)]
 
-use std::i32;
 use std::fmt;
+use std::i32;
 
 use core_foundation::base::{CFType, TCFType};
-use core_foundation::dictionary::CFDictionary;
-use core_foundation::string::{CFString, CFStringGetTypeID};
 use core_foundation::boolean::{CFBoolean, CFBooleanGetTypeID};
+use core_foundation::dictionary::CFDictionary;
 use core_foundation::number::{CFNumber, CFNumberGetTypeID};
+use core_foundation::string::{CFString, CFStringGetTypeID};
 
-use crate::{Result, Error};
-use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
-use super::{IoObject};
 use super::super::traits::DataSource;
+use super::IoObject;
+use crate::units::{ElectricCharge, ElectricCurrent, ElectricPotential, ThermodynamicTemperature, Time};
+use crate::{Error, Result};
 
 type Properties = CFDictionary<CFString, CFType>;
 
@@ -58,23 +58,20 @@ impl InstantData {
             max_capacity: milliampere_hour!(Self::get_u32(&props, MAX_CAPACITY_KEY)?),
             current_capacity: milliampere_hour!(Self::get_u32(&props, CURRENT_CAPACITY_KEY)?),
             temperature: Self::get_i32(&props, TEMPERATURE_KEY)
-                .map(|value| celsius!(value as f32 / 100.0)).ok(),
+                .map(|value| celsius!(value as f32 / 100.0))
+                .ok(),
             cycle_count: Self::get_u32(&props, CYCLE_COUNT_KEY).ok(),
-            time_remaining: Self::get_i32(&props, TIME_REMAINING_KEY).ok()
-                .and_then(|val| {
-                    if val == i32::MAX {
-                        None
-                    } else {
-                        Some(minute!(val))
-                    }
-                }),
+            time_remaining: Self::get_i32(&props, TIME_REMAINING_KEY)
+                .ok()
+                .and_then(|val| if val == i32::MAX { None } else { Some(minute!(val)) }),
         })
     }
 
     fn get_bool(props: &Properties, raw_key: &'static str) -> Result<bool> {
         let key = CFString::from_static_string(raw_key);
 
-        props.find(&key)
+        props
+            .find(&key)
             .and_then(|value_ref| {
                 unsafe {
                     debug_assert!(value_ref.type_of() == CFBooleanGetTypeID());
@@ -89,7 +86,8 @@ impl InstantData {
     fn get_u32(props: &Properties, raw_key: &'static str) -> Result<u32> {
         let key = CFString::from_static_string(raw_key);
 
-        props.find(&key)
+        props
+            .find(&key)
             .and_then(|value_ref| {
                 unsafe {
                     debug_assert!(value_ref.type_of() == CFNumberGetTypeID());
@@ -107,7 +105,8 @@ impl InstantData {
     fn get_i32(props: &Properties, raw_key: &'static str) -> Result<i32> {
         let key = CFString::from_static_string(raw_key);
 
-        props.find(&key)
+        props
+            .find(&key)
             .and_then(|value_ref| {
                 unsafe {
                     debug_assert!(value_ref.type_of() == CFNumberGetTypeID());
@@ -122,7 +121,8 @@ impl InstantData {
     fn get_string(props: &Properties, raw_key: &'static str) -> Result<String> {
         let key = CFString::from_static_string(raw_key);
 
-        props.find(&key)
+        props
+            .find(&key)
             .and_then(|value_ref| {
                 unsafe {
                     debug_assert!(value_ref.type_of() == CFStringGetTypeID());
@@ -229,8 +229,6 @@ impl DataSource for PowerSource {
 
 impl fmt::Debug for PowerSource {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("PowerSource")
-            .field("io_object", &self.object)
-            .finish()
+        f.debug_struct("PowerSource").field("io_object", &self.object).finish()
     }
 }

@@ -3,9 +3,9 @@
 
 use std::ops;
 
-use winapi::ctypes::{c_void};
-use winapi::shared::{ntdef};
-use winapi::um::{setupapi, handleapi, winbase};
+use winapi::ctypes::c_void;
+use winapi::shared::ntdef;
+use winapi::um::{handleapi, setupapi, winbase};
 
 #[derive(Debug)]
 pub struct InterfaceDetailData(setupapi::PSP_DEVICE_INTERFACE_DETAIL_DATA_W);
@@ -26,9 +26,7 @@ impl ops::Deref for InterfaceDetailData {
 
 impl Drop for InterfaceDetailData {
     fn drop(&mut self) {
-        let res = unsafe {
-            winbase::LocalFree(self.0 as *mut c_void)
-        };
+        let res = unsafe { winbase::LocalFree(self.0 as *mut c_void) };
         debug_assert_eq!(res, ntdef::NULL, "Unable to free device interface detail data");
     }
 }
@@ -58,10 +56,7 @@ impl ops::DerefMut for Handle {
 
 impl Drop for Handle {
     fn drop(&mut self) {
-        let res = unsafe {
-            handleapi::CloseHandle(self.0)
-        };
+        let res = unsafe { handleapi::CloseHandle(self.0) };
         debug_assert_ne!(res, 0, "Unable to close device handle");
     }
 }
-

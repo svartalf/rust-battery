@@ -1,13 +1,13 @@
 use std::mem;
 use std::ops::{Deref, DerefMut};
 
-use core_foundation::base::{mach_port_t, kCFNull, kCFAllocatorDefault, CFType, TCFType};
+use core_foundation::base::{kCFAllocatorDefault, kCFNull, mach_port_t, CFType, TCFType};
 use core_foundation::dictionary::{CFDictionary, CFMutableDictionary, CFMutableDictionaryRef};
 use core_foundation::string::CFString;
-use mach::{port, mach_port, kern_return, traps};
+use mach::{kern_return, mach_port, port, traps};
 
+use super::sys;
 use crate::Result;
-use super::{sys};
 
 #[derive(Debug)]
 pub struct IoMasterPort(mach_port_t);
@@ -43,9 +43,7 @@ impl IoMasterPort {
 
 impl Drop for IoMasterPort {
     fn drop(&mut self) {
-        let result = unsafe {
-            mach_port::mach_port_deallocate(traps::mach_task_self(), self.0)
-        };
+        let result = unsafe { mach_port::mach_port_deallocate(traps::mach_task_self(), self.0) };
         assert_eq!(result, kern_return::KERN_SUCCESS);
     }
 }
@@ -64,8 +62,12 @@ impl IoObject {
             #[allow(deprecated)]
             let mut props: CFMutableDictionaryRef = mem::uninitialized();
 
-            kern_try!(sys::IORegistryEntryCreateCFProperties(self.0, &mut props,
-                kCFAllocatorDefault, 0));
+            kern_try!(sys::IORegistryEntryCreateCFProperties(
+                self.0,
+                &mut props,
+                kCFAllocatorDefault,
+                0
+            ));
 
             Ok(CFMutableDictionary::wrap_under_create_rule(props).to_immutable())
         }
@@ -74,9 +76,7 @@ impl IoObject {
 
 impl Drop for IoObject {
     fn drop(&mut self) {
-        let result = unsafe {
-            sys::IOObjectRelease(self.0)
-        };
+        let result = unsafe { sys::IOObjectRelease(self.0) };
         assert_eq!(result, kern_return::KERN_SUCCESS);
     }
 }
@@ -103,17 +103,15 @@ impl Iterator for IoIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         match unsafe { sys::IOIteratorNext(self.0) } {
-            0 => None,  // TODO: Should not there be some `NULL`?
-            io_object => Some(IoObject(io_object))
+            0 => None, // TODO: Should not there be some `NULL`?
+            io_object => Some(IoObject(io_object)),
         }
     }
 }
 
 impl Drop for IoIterator {
     fn drop(&mut self) {
-        let result = unsafe {
-            sys::IOObjectRelease(self.0)
-        };
+        let result = unsafe { sys::IOObjectRelease(self.0) };
         assert_eq!(result, kern_return::KERN_SUCCESS);
     }
 }
@@ -122,9 +120,7 @@ impl Default for IoIterator {
     // It is extremely unsafe and inner field MUST BE initialized
     // before the further `Drop::drop` call
     fn default() -> IoIterator {
-        let inner = unsafe {
-            mem::zeroed()
-        };
+        let inner = unsafe { mem::zeroed() };
         IoIterator(inner)
     }
 }

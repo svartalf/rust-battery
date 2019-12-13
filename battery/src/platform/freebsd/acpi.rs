@@ -1,14 +1,14 @@
 // https://github.com/freebsd/freebsd/blob/master/sys/dev/acpica/acpiio.h
 // https://github.com/freebsd/freebsd/blob/master/sys/dev/acpica/acpi_battery.c
 
+use std::default::Default;
+use std::ffi::CStr;
 use std::fs;
 use std::mem;
+use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::str::FromStr;
-use std::default::Default;
-use std::os::unix::io::{IntoRawFd, AsRawFd, RawFd, FromRawFd};
-use std::ffi::CStr;
 
-use crate::{State, Technology, Result};
+use crate::{Result, State, Technology};
 
 const ACPI_CMBAT_MAXSTRLEN: usize = 32;
 
@@ -39,19 +39,19 @@ pub enum Units {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct AcpiBif {
-    units: u32,  // mW or mA, see `ACPI_BIF_UNITS_*`
-    dcap: u32,  // design capacity,
-    lfcap: u32,  // last full capacity,
-    btech: u32,  // battery technology,
-    dvol: u32,  // design voltage (mV),
-    wcap: u32,  // warn capacity,
-    lcap: u32,  // low capacity,
-    gra1: u32,  // granularity 1 (warn to low)
-    gra2: u32,  // granularity 2 (full to warn)
-    model: [u8; ACPI_CMBAT_MAXSTRLEN], // model identifier
+    units: u32,                          // mW or mA, see `ACPI_BIF_UNITS_*`
+    dcap: u32,                           // design capacity,
+    lfcap: u32,                          // last full capacity,
+    btech: u32,                          // battery technology,
+    dvol: u32,                           // design voltage (mV),
+    wcap: u32,                           // warn capacity,
+    lcap: u32,                           // low capacity,
+    gra1: u32,                           // granularity 1 (warn to low)
+    gra2: u32,                           // granularity 2 (full to warn)
+    model: [u8; ACPI_CMBAT_MAXSTRLEN],   // model identifier
     serial: [u8; ACPI_CMBAT_MAXSTRLEN],  // serial number
-    type_: [u8; ACPI_CMBAT_MAXSTRLEN],  // type
-    oeminfo: [u8; ACPI_CMBAT_MAXSTRLEN],  // OEM information
+    type_: [u8; ACPI_CMBAT_MAXSTRLEN],   // type
+    oeminfo: [u8; ACPI_CMBAT_MAXSTRLEN], // OEM information
 }
 
 impl AcpiBif {
@@ -86,7 +86,7 @@ impl AcpiBif {
             Some(ref type_) => match Technology::from_str(type_) {
                 Ok(tech) => tech,
                 Err(_) => Technology::Unknown,
-            }
+            },
         }
     }
 
@@ -128,17 +128,16 @@ impl AcpiBif {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct AcpiBst {
-    state: u32,  // battery state
+    state: u32, // battery state
     rate: u32,  // present rate
-    cap: u32,  // remaining capacity
+    cap: u32,   // remaining capacity
     volt: u32,  // present voltage
 }
 
 impl AcpiBst {
     // int acpi_battery_bst_valid(struct acpi_bst *bst)
     pub fn is_valid(&self) -> bool {
-        self.state != ACPI_BATT_STAT_NOT_PRESENT && self.cap != ACPI_BATT_UNKNOWN
-            && self.volt != ACPI_BATT_UNKNOWN
+        self.state != ACPI_BATT_STAT_NOT_PRESENT && self.cap != ACPI_BATT_UNKNOWN && self.volt != ACPI_BATT_UNKNOWN
     }
 
     // based on `ACPI_BATT_STAT_*` defines
@@ -154,7 +153,7 @@ impl AcpiBst {
             // In fact, right now this match arm is unreachable in most cases,
             // because previous arms will match first, but it would be harder to forget about it
             value if value & ACPI_BATT_STAT_CRITICAL != 0 => State::Discharging,
-            _ => State::Unknown
+            _ => State::Unknown,
         }
     }
 
@@ -176,16 +175,14 @@ impl AcpiBst {
 
 #[repr(C)]
 pub union AcpiBatteryIoctlArg {
-    unit: i32,  // Device unit or ACPI_BATTERY_ALL_UNITS
+    unit: i32, // Device unit or ACPI_BATTERY_ALL_UNITS
     bif: AcpiBif,
     bst: AcpiBst,
 }
 
 impl Default for AcpiBatteryIoctlArg {
     fn default() -> Self {
-        unsafe {
-            mem::zeroed()
-        }
+        unsafe { mem::zeroed() }
     }
 }
 
@@ -198,9 +195,7 @@ pub struct AcpiDevice(RawFd);
 
 impl AcpiDevice {
     pub fn new() -> Result<AcpiDevice> {
-        let file = fs::OpenOptions::new()
-            .read(true)
-            .open("/dev/acpi")?;
+        let file = fs::OpenOptions::new().read(true).open("/dev/acpi")?;
 
         Ok(AcpiDevice(file.into_raw_fd()))
     }
@@ -208,9 +203,7 @@ impl AcpiDevice {
     /// Count of the available batteries
     pub fn count(&self) -> Result<libc::c_int> {
         let mut arg = 0i32;
-        unsafe {
-            acpiio_batt_get_units(self.0, &mut arg as *mut _)?
-        };
+        unsafe { acpiio_batt_get_units(self.0, &mut arg as *mut _)? };
 
         Ok(arg)
     }
@@ -218,8 +211,7 @@ impl AcpiDevice {
     /// # Returns
     ///
     /// * `Ok(Some(bif))` - successfully fetched bif
-    /// * `Ok(None)` - bif was fetched but it is invalid;
-    ///     it is not an error, because we want to skip it silently
+    /// * `Ok(None)` - bif was fetched but it is invalid; it is not an error, because we want to skip it silently
     /// * `Err(e)` - FFI call failed
     pub fn bif(&self, unit: libc::c_int) -> Result<Option<AcpiBif>> {
         let mut arg = AcpiBatteryIoctlArg::default();
@@ -227,22 +219,15 @@ impl AcpiDevice {
             arg.unit = unit;
             acpiio_batt_get_bif(self.0, &mut arg as *mut _)?
         };
-        let info = unsafe {
-            arg.bif
-        };
+        let info = unsafe { arg.bif };
 
-        if info.is_valid() {
-            Ok(Some(info))
-        } else {
-            Ok(None)
-        }
+        if info.is_valid() { Ok(Some(info)) } else { Ok(None) }
     }
 
     /// # Returns
     ///
     /// * `Ok(Some(bst))` - successfully fetched bst
-    /// * `Ok(None)` - bst was fetched but it is invalid;
-    ///     it is not an error, because we want to skip it silently
+    /// * `Ok(None)` - bst was fetched but it is invalid; it is not an error, because we want to skip it silently
     /// * `Err(e)` - FFI call failed
     pub fn bst(&self, unit: i32) -> Result<Option<AcpiBst>> {
         let mut arg = AcpiBatteryIoctlArg::default();
@@ -250,15 +235,9 @@ impl AcpiDevice {
             arg.unit = unit;
             acpiio_batt_get_bst(self.0, &mut arg as *mut _)?
         };
-        let info = unsafe {
-            arg.bst
-        };
+        let info = unsafe { arg.bst };
 
-        if info.is_valid() {
-            Ok(Some(info))
-        } else {
-            Ok(None)
-        }
+        if info.is_valid() { Ok(Some(info)) } else { Ok(None) }
     }
 }
 

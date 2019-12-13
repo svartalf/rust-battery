@@ -2,11 +2,11 @@
 
 #![allow(non_snake_case, clippy::unreadable_literal)]
 
+use std::default::Default;
 use std::mem;
 use std::ops;
-use std::default::Default;
 
-use winapi::shared::{ntdef};
+use winapi::shared::ntdef;
 
 use crate::State;
 
@@ -27,7 +27,7 @@ const BATTERY_DISCHARGING: ntdef::ULONG = 0x00000002;
 /// Indicates that the system has access to AC power, so no batteries are being discharged.
 const BATTERY_POWER_ON_LINE: ntdef::ULONG = 0x00000001;
 
-STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_STATUS {
+STRUCT! {#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_STATUS {
     PowerState: ntdef::ULONG,
     Capacity: ntdef::ULONG, // mWh or BATTERY_UNKNOWN_CAPACITY
     Voltage: ntdef::ULONG, // mV or BATTERY_UNKNOWN_VOLTAGE
@@ -37,9 +37,7 @@ STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct B
 impl Default for BATTERY_STATUS {
     #[inline]
     fn default() -> Self {
-        unsafe {
-            mem::zeroed()
-        }
+        unsafe { mem::zeroed() }
     }
 }
 
@@ -92,7 +90,7 @@ impl BatteryStatus {
             _ if self.is_critical() => State::Empty,
             _ if self.is_discharging() => State::Discharging,
             _ if self.is_power_on_line() && !self.is_charging() => State::Full,
-            _ => State::Unknown
+            _ => State::Unknown,
         }
     }
 

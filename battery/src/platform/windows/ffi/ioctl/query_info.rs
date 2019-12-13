@@ -2,15 +2,15 @@
 
 #![allow(non_snake_case)]
 
+use std::default::Default;
 use std::mem;
 use std::ops;
-use std::default::Default;
 
-use winapi::shared::{ntdef};
+use winapi::shared::ntdef;
 
 use super::info_level;
 
-STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_QUERY_INFORMATION {
+STRUCT! {#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_QUERY_INFORMATION {
     BatteryTag: ntdef::ULONG,
     InformationLevel: info_level::BATTERY_QUERY_INFORMATION_LEVEL,
     AtRate: ntdef::LONG,
@@ -19,9 +19,7 @@ STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct B
 impl Default for BATTERY_QUERY_INFORMATION {
     #[inline]
     fn default() -> Self {
-        unsafe {
-            mem::zeroed()
-        }
+        unsafe { mem::zeroed() }
     }
 }
 

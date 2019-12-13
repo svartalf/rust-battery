@@ -2,9 +2,9 @@ use std::fs;
 
 use approx::assert_abs_diff_eq;
 
-use crate::{State, Technology};
-use crate::platform::traits::BatteryDevice;
 use super::super::SysFsDevice;
+use crate::platform::traits::BatteryDevice;
+use crate::{State, Technology};
 
 // https://github.com/svartalf/rust-battery/issues/40
 //
@@ -50,22 +50,20 @@ fn test_issue_40() {
     assert_abs_diff_eq!(device.energy_rate().value, 0.00089799997);
     assert_abs_diff_eq!(device.voltage().value, 11.8289995);
 
-
-//    &device.source = InstantData {
-//    state_of_health: 1.0,
-//    state_of_charge: 0.83,
-//    energy: 0.0 m^2 kg^1 s^-2,
-//    energy_full: 0.0 m^2 kg^1 s^-2,
-//    energy_full_design: 0.0 m^2 kg^1 s^-2,
-//    energy_rate: 0.00089799997 m^2 kg^1 s^-3,
-//    voltage: 11.8289995 m^2 kg^1 s^-3 A^-1,
-//    state: Discharging,
-//    temperature: Some(
-//        298.94998 K^1,
-//    ),
-//    cycle_count: None,
-//}
-
+    //    &device.source = InstantData {
+    //    state_of_health: 1.0,
+    //    state_of_charge: 0.83,
+    //    energy: 0.0 m^2 kg^1 s^-2,
+    //    energy_full: 0.0 m^2 kg^1 s^-2,
+    //    energy_full_design: 0.0 m^2 kg^1 s^-2,
+    //    energy_rate: 0.00089799997 m^2 kg^1 s^-3,
+    //    voltage: 11.8289995 m^2 kg^1 s^-3 A^-1,
+    //    state: Discharging,
+    //    temperature: Some(
+    //        298.94998 K^1,
+    //    ),
+    //    cycle_count: None,
+    //}
 
     fs::remove_dir_all(path).unwrap();
 }

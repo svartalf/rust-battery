@@ -1,10 +1,10 @@
-use std::fmt;
 use std::convert::AsRef;
+use std::fmt;
 
-use crate::units::{ElectricPotential, ThermodynamicTemperature, Power, Energy};
-use crate::{State, Technology, Error, Result};
+use super::ffi::{BatteryQueryInformation, DeviceHandle};
 use crate::platform::traits::BatteryDevice;
-use super::ffi::{DeviceHandle, BatteryQueryInformation};
+use crate::units::{ElectricPotential, Energy, Power, ThermodynamicTemperature};
+use crate::{Error, Result, State, Technology};
 
 #[derive(Default)]
 pub struct PowerDevice {
@@ -26,12 +26,11 @@ pub struct PowerDevice {
 }
 
 impl PowerDevice {
-
     pub fn try_from(mut handle: DeviceHandle) -> Result<Option<PowerDevice>> {
         let info = handle.information()?;
         if info.is_relative() {
             // We can't support batteries with relative data so far
-            return Ok(None)
+            return Ok(None);
         }
 
         let device_name = match handle.device_name() {
