@@ -1,10 +1,10 @@
-use std::fmt;
 use std::convert::AsRef;
+use std::fmt;
 
-use crate::{State, Technology, Result};
-use crate::platform::traits::BatteryDevice;
-use crate::units::{Energy, Power, ElectricPotential, ThermodynamicTemperature};
 use super::acpi;
+use crate::platform::traits::BatteryDevice;
+use crate::units::{ElectricPotential, Energy, Power, ThermodynamicTemperature};
+use crate::{Result, State, Technology};
 
 #[derive(Default)]
 pub struct IoCtlDevice {
@@ -22,7 +22,6 @@ pub struct IoCtlDevice {
     manufacturer: Option<String>,
     model: Option<String>,
     serial_number: Option<String>,
-
 }
 
 impl IoCtlDevice {
@@ -128,8 +127,6 @@ impl BatteryDevice for IoCtlDevice {
 
 impl fmt::Debug for IoCtlDevice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("FreeBSDDevice")
-            .field("unit", &self.unit)
-            .finish()
+        f.debug_struct("FreeBSDDevice").field("unit", &self.unit).finish()
     }
 }

@@ -2,18 +2,18 @@
 
 #![allow(non_snake_case, clippy::unreadable_literal)]
 
+use std::default::Default;
 use std::mem;
 use std::ops;
-use std::default::Default;
 use std::str::{self, FromStr};
 
-use winapi::shared::{ntdef};
 use crate::Technology;
+use winapi::shared::ntdef;
 
 pub const BATTERY_CAPACITY_RELATIVE: ntdef::ULONG = 0x40000000;
 pub const BATTERY_SYSTEM_BATTERY: ntdef::ULONG = 0x80000000;
 
-STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_INFORMATION {
+STRUCT! {#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct BATTERY_INFORMATION {
     Capabilities: ntdef::ULONG,
     Technology: ntdef::UCHAR,
     Reserved: [ntdef::UCHAR; 3],
@@ -29,9 +29,7 @@ STRUCT!{#[cfg_attr(target_arch = "x86", repr(packed))] #[derive(Debug)] struct B
 impl Default for BATTERY_INFORMATION {
     #[inline]
     fn default() -> Self {
-        unsafe {
-            mem::zeroed()
-        }
+        unsafe { mem::zeroed() }
     }
 }
 
@@ -95,5 +93,4 @@ impl BatteryInformation {
             Some(self.0.CycleCount)
         }
     }
-
 }

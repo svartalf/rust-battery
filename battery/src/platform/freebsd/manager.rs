@@ -2,9 +2,9 @@ use std::fmt;
 use std::ops::Deref;
 use std::os::unix::io::AsRawFd;
 
-use crate::{Result, Error};
-use crate::platform::traits::{BatteryManager, BatteryIterator};
 use super::{acpi, IoCtlIterator};
+use crate::platform::traits::{BatteryIterator, BatteryManager};
+use crate::{Error, Result};
 
 pub struct IoCtlManager(acpi::AcpiDevice);
 
@@ -37,8 +37,6 @@ impl Deref for IoCtlManager {
 
 impl fmt::Debug for IoCtlManager {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("FreeBSD")
-            .field("fd", &self.0.as_raw_fd())
-            .finish()
+        f.debug_struct("FreeBSD").field("fd", &self.0.as_raw_fd()).finish()
     }
 }

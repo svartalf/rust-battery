@@ -19,7 +19,10 @@ impl BatteryIterator for SysFsIterator {
     fn new(manager: Rc<Self::Manager>) -> Result<Self> {
         let entries = fs::read_dir(manager.path())?;
 
-        Ok(SysFsIterator { manager, entries })
+        Ok(SysFsIterator {
+            manager,
+            entries,
+        })
     }
 }
 

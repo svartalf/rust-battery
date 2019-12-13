@@ -1,10 +1,9 @@
 use std::fmt;
 use std::rc::Rc;
 
-use crate::{Result};
-use crate::platform::traits::{BatteryIterator};
 use super::{iokit, IoKitDevice, IoKitManager};
-
+use crate::platform::traits::BatteryIterator;
+use crate::Result;
 
 pub struct IoKitIterator {
     #[allow(dead_code)]
@@ -18,12 +17,10 @@ impl Iterator for IoKitIterator {
     fn next(&mut self) -> Option<Self::Item> {
         match self.inner.next() {
             None => None,
-            Some(io_obj) => {
-                match iokit::PowerSource::try_from(io_obj) {
-                    Ok(source) => Some(Ok(source.into())),
-                    Err(e) => Some(Err(e)),
-                }
-            }
+            Some(io_obj) => match iokit::PowerSource::try_from(io_obj) {
+                Ok(source) => Some(Ok(source.into())),
+                Err(e) => Some(Err(e)),
+            },
         }
     }
 
@@ -39,7 +36,7 @@ impl BatteryIterator for IoKitIterator {
     fn new(manager: Rc<Self::Manager>) -> Result<Self> {
         let services = manager.get_services()?;
 
-        Ok(Self{
+        Ok(Self {
             manager,
             inner: services,
         })

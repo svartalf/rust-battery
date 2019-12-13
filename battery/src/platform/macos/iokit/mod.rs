@@ -1,7 +1,8 @@
-#[macro_use] mod errors;
+#[macro_use]
+mod errors;
+mod power_source;
 mod sys;
 mod wrappers;
-mod power_source;
 
 pub use self::power_source::PowerSource;
 pub use self::wrappers::*;

@@ -1,10 +1,10 @@
 use std::fmt;
-use std::rc::Rc;
 use std::ops::Range;
+use std::rc::Rc;
 
-use crate::Result;
-use crate::platform::traits::{BatteryIterator};
 use super::{IoCtlDevice, IoCtlManager};
+use crate::platform::traits::BatteryIterator;
+use crate::Result;
 
 pub struct IoCtlIterator {
     manager: Rc<IoCtlManager>,
@@ -25,7 +25,7 @@ impl Iterator for IoCtlIterator {
                     match (bif, bst) {
                         (Ok(Some(bif)), Ok(Some(bst))) => {
                             return Some(Ok(IoCtlDevice::new(idx, bif, bst)));
-                        },
+                        }
                         (Err(e), _) => return Some(Err(e)),
                         (_, Err(e)) => return Some(Err(e)),
                         // If bif or bst is invalid (`Ok(None)` here),

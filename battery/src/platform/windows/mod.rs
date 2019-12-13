@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/windows/desktop/power/power-management-portal
 
-mod ffi;
 mod device;
+mod ffi;
 mod iterator;
 mod manager;
 

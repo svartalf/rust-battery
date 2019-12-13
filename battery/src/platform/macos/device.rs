@@ -5,16 +5,16 @@
 //    - ChargingCurrent
 //    - NotChargingReason (?)
 
+use num_traits::identities::Zero;
+use std::boxed::Box;
 use std::fmt;
 use std::str;
-use std::boxed::Box;
-use num_traits::identities::Zero;
 
-use crate::Result;
-use crate::units::{ElectricPotential, ThermodynamicTemperature, Time, Power, Energy};
-use crate::types::{State, Technology};
-use crate::platform::traits::BatteryDevice;
 use super::traits::DataSource;
+use crate::platform::traits::BatteryDevice;
+use crate::types::{State, Technology};
+use crate::units::{ElectricPotential, Energy, Power, ThermodynamicTemperature, Time};
+use crate::Result;
 
 pub struct IoKitDevice {
     source: Box<dyn DataSource>,
@@ -102,7 +102,10 @@ impl BatteryDevice for IoKitDevice {
     }
 }
 
-impl<T> From<T> for IoKitDevice where T: DataSource {
+impl<T> From<T> for IoKitDevice
+where
+    T: DataSource,
+{
     fn from(ds: T) -> IoKitDevice {
         IoKitDevice {
             source: Box::new(ds),
@@ -112,8 +115,6 @@ impl<T> From<T> for IoKitDevice where T: DataSource {
 
 impl fmt::Debug for IoKitDevice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("MacOSDevice")
-            .field("source", &self.source)
-            .finish()
+        f.debug_struct("MacOSDevice").field("source", &self.source).finish()
     }
 }

@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
+use crate::units::{ElectricCharge, ElectricCurrent, ElectricPotential, ThermodynamicTemperature, Time};
 use crate::Result;
-use crate::units::{ElectricPotential, ElectricCurrent, ElectricCharge, ThermodynamicTemperature, Time};
 
 /// Used for IOPMPowerSource wrapper and for tests.
 ///
@@ -58,8 +58,10 @@ pub trait DataSource: Debug + 'static {
     fn serial_number(&self) -> Option<&str>;
 }
 
-
-impl<T> DataSource for Box<T> where T: DataSource + ?Sized {
+impl<T> DataSource for Box<T>
+where
+    T: DataSource + ?Sized,
+{
     fn refresh(&mut self) -> Result<()> {
         (**self).refresh()
     }

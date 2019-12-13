@@ -3,17 +3,17 @@
 // Each sub-module represents a C-level struct to respective IOCTL request
 // and idiomatic Rust struct around it.
 
-use winapi::shared::{minwindef};
+use winapi::shared::minwindef;
 
-mod status;
-mod wait_status;
 mod info;
 mod query_info;
+mod status;
+mod wait_status;
 
-pub use self::status::BatteryStatus;
-pub use self::wait_status::BatteryWaitStatus;
 pub use self::info::BatteryInformation;
 pub use self::query_info::BatteryQueryInformation;
+pub use self::status::BatteryStatus;
+pub use self::wait_status::BatteryWaitStatus;
 
 // Following values are based on the https://www.ioctls.net data
 pub const IOCTL_BATTERY_QUERY_TAG: minwindef::DWORD = 0x294040;
@@ -29,13 +29,13 @@ pub mod info_level {
 
     pub type BATTERY_QUERY_INFORMATION_LEVEL = u32;
 
-//    pub const BatteryInformation: BATTERY_QUERY_INFORMATION_LEVEL = 0;
-//    pub const BatteryGranularityInformation: BATTERY_QUERY_INFORMATION_LEVEL = 1;
+    //    pub const BatteryInformation: BATTERY_QUERY_INFORMATION_LEVEL = 0;
+    //    pub const BatteryGranularityInformation: BATTERY_QUERY_INFORMATION_LEVEL = 1;
     pub const BatteryTemperature: BATTERY_QUERY_INFORMATION_LEVEL = 2;
-//    pub const BatteryEstimatedTime: BATTERY_QUERY_INFORMATION_LEVEL = 3;
+    //    pub const BatteryEstimatedTime: BATTERY_QUERY_INFORMATION_LEVEL = 3;
     pub const BatteryDeviceName: BATTERY_QUERY_INFORMATION_LEVEL = 4;
-//    pub const BatteryManufactureDate: BATTERY_QUERY_INFORMATION_LEVEL = 5;
+    //    pub const BatteryManufactureDate: BATTERY_QUERY_INFORMATION_LEVEL = 5;
     pub const BatteryManufactureName: BATTERY_QUERY_INFORMATION_LEVEL = 6;
-//    pub const BatteryUniqueID: BATTERY_QUERY_INFORMATION_LEVEL = 7;
+    //    pub const BatteryUniqueID: BATTERY_QUERY_INFORMATION_LEVEL = 7;
     pub const BatterySerialNumber: BATTERY_QUERY_INFORMATION_LEVEL = 8;
 }
