@@ -27,14 +27,13 @@ lazycell = "1.2.1"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "^0.2"
-mach = "0.2.3"
+mach = "^0.3"
 core-foundation = "0.6.4"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winapi = { version ="0.3.7", features = ["impl-default", "devguid", "winbase", "ioapiset", "ntdef", "setupapi", "handleapi", "errhandlingapi", "winerror"] }
 
 [target.'cfg(any(target_os = "dragonfly", target_os = "freebsd"))'.dependencies]
-nix = "^0.15"
 libc = "^0.2"
 
 [dev-dependencies]

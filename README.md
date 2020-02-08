@@ -4,7 +4,7 @@
 [![Latest Version](https://docs.rs/battery/badge.svg)](https://docs.rs/battery)
 [![dependency status](https://deps.rs/crate/battery/0.7.5/status.svg)](https://deps.rs/crate/battery/0.7.5)
 [![Build Status](https://github.com/svartalf/rust-battery/workflows/Continuous%20integration/badge.svg)](https://github.com/svartalf/rust-battery/actions?workflow=Continuous+integration)
-![Minimum rustc version](https://img.shields.io/badge/rustc-1.32+-yellow.svg)
+![Minimum rustc version](https://img.shields.io/badge/rustc-1.33+-yellow.svg)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
 [![Backers on Open Collective](https://opencollective.com/rust-battery/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/rust-battery/sponsors/badge.svg)](#sponsors)
@@ -43,7 +43,7 @@ as a typed values, recalculated as necessary to be returned as a [SI measurement
 
 ## Install
 
-As a prerequisite, `battery` crate requires at least Rustc version **1.32** or greater.
+As a prerequisite, `battery` crate requires at least Rustc version **1.33** or greater.
 
 Add the following line into a `Cargo.toml`:
 
