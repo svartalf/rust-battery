@@ -20,21 +20,21 @@ is-it-maintained-open-issues = { repository = "svartalf/rust-battery" }
 [dependencies]
 cfg-if = "0.1"
 num-traits = { version = "0.2", default_features = false }
-uom = { version = "^0.27", features = ["autoconvert", "f32", "si"] }
+uom = { version = "~0.27", features = ["autoconvert", "f32", "si"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-lazycell = "1.2.1"
+lazycell = "~1.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "^0.2"
 mach = "^0.3"
-core-foundation = "0.6.4"
+core-foundation = "~0.7"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-winapi = { version ="0.3.7", features = ["impl-default", "devguid", "winbase", "ioapiset", "ntdef", "setupapi", "handleapi", "errhandlingapi", "winerror"] }
+winapi = { version ="~0.3", features = ["impl-default", "devguid", "winbase", "ioapiset", "ntdef", "setupapi", "handleapi", "errhandlingapi", "winerror"] }
 
 [target.'cfg(any(target_os = "dragonfly", target_os = "freebsd"))'.dependencies]
-libc = "^0.2"
+libc = "~0.2"
 
 [dev-dependencies]
 tempfile = "^3.0"
