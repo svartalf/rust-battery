@@ -1,5 +1,5 @@
 cfg_if! {
-    if #[cfg(target_os = "linux")] {
+    if #[cfg(any(target_os = "linux", target_os = "android"))] {
         mod linux;
 
         pub type Manager = linux::SysFsManager;
