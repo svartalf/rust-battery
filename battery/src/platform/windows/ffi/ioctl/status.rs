@@ -110,6 +110,7 @@ impl BatteryStatus {
         }
     }
 
+    /// The current rate of battery charge or discharge.
     pub fn rate(&self) -> Option<i32> {
         if self.0.Rate == BATTERY_UNKNOWN_RATE {
             None

@@ -63,7 +63,8 @@ impl PowerDevice {
 
         let status = handle.status()?;
         let rate = match status.rate() {
-            None => return Err(Error::invalid_data("Device rate value is unknown")),
+            // Battery neither charging nor discharging, energy rate is set to zero
+            None => watt!(0.0),
             Some(value) => milliwatt!(value),
         };
         let capacity = match status.capacity() {

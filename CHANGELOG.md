@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - MSRV changed to Rust `1.36.0`
 
+### Fixed
+
+- Zero energy rate is not considered as an error for Windows [#63](https://github.com/svartalf/rust-battery/issues/63)
+
 ## [0.7.5] - 2019-11-26
 ### Fixed
 

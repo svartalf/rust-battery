@@ -180,8 +180,8 @@ impl iter::Iterator for DeviceIterator {
 
         Some(DeviceHandle {
             //            interface_details: interface_detail_data,
-            handle: handle,
-            tag: tag,
+            handle,
+            tag,
         })
     }
 }
