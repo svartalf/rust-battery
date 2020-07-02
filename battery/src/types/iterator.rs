@@ -3,10 +3,12 @@ use std::fmt;
 use crate::platform::Iterator as PlatformIterator;
 use crate::{Battery, Result};
 
-/// An iterator that yields batteries available in system.
+/// An iterator that yields [batteries] available in system.
 ///
 /// This struct is created by the [Manager::batteries](struct.Manager.html#method.batteries) method.
 /// See its documentation for more.
+///
+/// [batteries]: struct.Battery.html
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 pub struct Batteries(PlatformIterator);
 

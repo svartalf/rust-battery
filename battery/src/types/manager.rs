@@ -8,7 +8,7 @@ use crate::{Batteries, Battery, Result};
 
 /// Manager for batteries available in system.
 ///
-/// Knows how to fetch them and update information.
+/// Allows fetching and updating [batteries] information.
 ///
 /// # Example
 ///
@@ -21,12 +21,14 @@ use crate::{Batteries, Battery, Result};
 /// # Ok(())
 /// # }
 /// ```
+///
+/// [batteries]: struct.Battery.html
 pub struct Manager {
     inner: Rc<PlatformManager>,
 }
 
 impl Manager {
-    /// Creates new manager instance.
+    /// Creates new manager value.
     pub fn new() -> Result<Manager> {
         let inner = PlatformManager::new()?;
 
@@ -35,7 +37,13 @@ impl Manager {
         })
     }
 
-    /// Gets an iterator over available [batteries](struct.Battery.html).
+    /// Returns an iterator over available batteries.
+    ///
+    /// There are no guarantees provided for [batteries] ordering,
+    /// multiple calls to this method might result in any particular order
+    /// depending on underline OS implementation.
+    ///
+    /// [batteries]: struct.Battery.html
     pub fn batteries(&self) -> Result<Batteries> {
         let inner = PlatformIterator::new(self.inner.clone())?;
 
