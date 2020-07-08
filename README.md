@@ -36,6 +36,7 @@ as a typed values, recalculated as necessary to be returned as a [SI measurement
 
 * Linux 2.6.39+
 * MacOS 10.10+
+* iOS
 * Windows 7+
 * FreeBSD
 * DragonFlyBSD
