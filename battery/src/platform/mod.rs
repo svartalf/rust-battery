@@ -5,12 +5,12 @@ cfg_if! {
         pub type Manager = linux::SysFsManager;
         pub type Iterator = linux::SysFsIterator;
         pub type Device = linux::SysFsDevice;
-    } else if #[cfg(target_os = "macos")] {
-        mod macos;
+    } else if #[cfg(any(target_os = "macos", target_os = "ios"))] {
+        mod darwin;
 
-        pub type Manager = macos::IoKitManager;
-        pub type Iterator = macos::IoKitIterator;
-        pub type Device = macos::IoKitDevice;
+        pub type Manager = darwin::IoKitManager;
+        pub type Iterator = darwin::IoKitIterator;
+        pub type Device = darwin::IoKitDevice;
     } else if #[cfg(target_os = "windows")] {
         mod windows;
 
