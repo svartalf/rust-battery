@@ -37,6 +37,7 @@ as a typed values, recalculated as necessary to be returned as a [SI measurement
 * Linux 2.6.39+
 * MacOS 10.10+
 * iOS
+  * **Warning:** Usage of this crate may result in automatic rejection from the iOS App Store! You have been warned!
 * Windows 7+
 * FreeBSD
 * DragonFlyBSD
