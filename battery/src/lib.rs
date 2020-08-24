@@ -23,7 +23,8 @@
 #![deny(unused)]
 #![deny(unstable_features)]
 #![deny(bare_trait_objects)]
-#![doc(html_root_url = "https://docs.rs/battery/0.7.5")]
+#![allow(clippy::manual_non_exhaustive)]  // MSRV is 1.36
+#![doc(html_root_url = "https://docs.rs/battery/0.7.6")]
 
 #[macro_use]
 extern crate cfg_if;
