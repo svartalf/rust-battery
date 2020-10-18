@@ -18,7 +18,7 @@ is-it-maintained-issue-resolution = { repository = "svartalf/rust-battery" }
 is-it-maintained-open-issues = { repository = "svartalf/rust-battery" }
 
 [dependencies]
-cfg-if = "0.1"
+cfg-if = "1.0"
 num-traits = { version = "0.2", default_features = false }
 uom = { version = "0.30", features = ["autoconvert", "f32", "si"] }
 
