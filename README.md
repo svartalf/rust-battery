@@ -52,7 +52,7 @@ Add the following line into a `Cargo.toml`:
 
 ```toml
 [dependencies]
-battery = "0.7.5"
+battery = "0.7.7"
 ```
 
 ## Examples
