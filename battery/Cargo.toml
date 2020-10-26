@@ -38,4 +38,4 @@ libc = "~0.2"
 
 [dev-dependencies]
 tempfile = "^3.0"
-approx = "0.3.2"
+approx = "0.4.0"
