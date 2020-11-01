@@ -1,0 +1,15 @@
+task:
+  name: FreeBSD 12.1
+  freebsd_instance:
+    image_family: freebsd-12-1
+
+  setup_script:
+    - pkg install -y curl
+    - curl https://sh.rustup.rs -sSf --output rustup.sh
+    - sh rustup.sh -y --profile=minimal
+    - . $HOME/.cargo/env
+    - rustup default stable
+
+  build_script:
+    - . $HOME/.cargo/env
+    - cargo build
