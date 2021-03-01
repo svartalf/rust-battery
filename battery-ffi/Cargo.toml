@@ -31,7 +31,7 @@ path = "../battery"
 libc = "^0.2"
 
 [build-dependencies]
-cbindgen = { version = "^0.13", optional = true }
+cbindgen = { version = "^0.18", optional = true }
 
 [package.metadata.docs.rs]
 no-default-features = true
