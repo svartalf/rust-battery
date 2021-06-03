@@ -39,4 +39,4 @@ nix = "~0.19"
 
 [dev-dependencies]
 tempfile = "^3.0"
-approx = "0.3.2"
+approx = "0.5.0"
