@@ -35,7 +35,7 @@ winapi = { version ="~0.3", features = ["impl-default", "devguid", "winbase", "i
 
 [target.'cfg(any(target_os = "dragonfly", target_os = "freebsd"))'.dependencies]
 libc = "~0.2"
-nix = "~0.19"
+nix = "~0.22"
 
 [dev-dependencies]
 tempfile = "^3.0"
