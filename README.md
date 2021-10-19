@@ -3,7 +3,7 @@
 [![Latest Version](https://img.shields.io/crates/v/battery.svg)](https://crates.io/crates/battery)
 [![Latest Version](https://docs.rs/battery/badge.svg)](https://docs.rs/battery)
 [![Build Status](https://github.com/svartalf/rust-battery/workflows/Continuous%20integration/badge.svg)](https://github.com/svartalf/rust-battery/actions?workflow=Continuous+integration)
-![Minimum rustc version](https://img.shields.io/badge/rustc-1.36+-yellow.svg)
+![Minimum rustc version](https://img.shields.io/badge/rustc-1.46+-yellow.svg)
 ![Apache 2.0 OR MIT licensed](https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg)
 [![Backers on Open Collective](https://opencollective.com/rust-battery/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/rust-battery/sponsors/badge.svg)](#sponsors)
@@ -46,7 +46,7 @@ might be automatically rejected by Apple based on that fact. Use it on your own 
 
 ## Install
 
-As a prerequisite, `battery` crate requires at least Rustc version **1.36** or greater.
+As a prerequisite, `battery` crate requires at least Rustc version **1.46** or greater.
 
 Add the following line into a `Cargo.toml`:
 
