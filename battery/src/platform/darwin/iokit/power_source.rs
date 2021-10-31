@@ -33,12 +33,12 @@ static BATTERY_SERIAL_NUMBER_KEY: &'static str = "BatterySerialNumber";
 
 #[derive(Debug)]
 pub struct InstantData {
-    fully_charged: bool,
+    fully_charged: Option<bool>,
     external_connected: bool,
     is_charging: bool,
     voltage: ElectricPotential,
     amperage: ElectricCurrent,
-    design_capacity: ElectricCharge,
+    design_capacity: Option<ElectricCharge>,
     max_capacity: ElectricCharge,
     current_capacity: ElectricCharge,
     temperature: Option<ThermodynamicTemperature>,
@@ -49,12 +49,12 @@ pub struct InstantData {
 impl InstantData {
     pub fn try_from(props: &Properties) -> Result<InstantData> {
         Ok(Self {
-            fully_charged: Self::get_bool(&props, FULLY_CHARGED_KEY)?,
+            fully_charged: Self::get_bool(&props, FULLY_CHARGED_KEY).ok(),
             external_connected: Self::get_bool(&props, EXTERNAL_CONNECTED_KEY)?,
             is_charging: Self::get_bool(&props, IS_CHARGING_KEY)?,
             voltage: millivolt!(Self::get_u32(&props, VOLTAGE_KEY)?),
             amperage: milliampere!(Self::get_i32(&props, AMPERAGE_KEY)?.abs()),
-            design_capacity: milliampere_hour!(Self::get_u32(&props, DESIGN_CAPACITY_KEY)?),
+            design_capacity: Self::get_u32(&props, DESIGN_CAPACITY_KEY).ok().map(|capacity| milliampere_hour!(capacity)),
             max_capacity: milliampere_hour!(Self::get_u32(&props, MAX_CAPACITY_KEY)?),
             current_capacity: milliampere_hour!(Self::get_u32(&props, CURRENT_CAPACITY_KEY)?),
             temperature: Self::get_i32(&props, TEMPERATURE_KEY)
@@ -148,6 +148,7 @@ impl PowerSource {
     pub fn try_from(io_obj: IoObject) -> Result<PowerSource> {
         let props = io_obj.properties()?;
         let data = InstantData::try_from(&props)?;
+
         let manufacturer = InstantData::get_string(&props, MANUFACTURER_KEY).ok();
         let device_name = InstantData::get_string(&props, DEVICE_NAME_KEY).ok();
         let serial_number = InstantData::get_string(&props, BATTERY_SERIAL_NUMBER_KEY).ok();
@@ -171,7 +172,7 @@ impl DataSource for PowerSource {
     }
 
     fn fully_charged(&self) -> bool {
-        self.data.fully_charged
+        self.data.fully_charged.unwrap_or(true)
     }
 
     fn external_connected(&self) -> bool {
@@ -191,7 +192,7 @@ impl DataSource for PowerSource {
     }
 
     fn design_capacity(&self) -> ElectricCharge {
-        self.data.design_capacity
+        self.data.design_capacity.unwrap_or(ElectricCharge::default())
     }
 
     fn max_capacity(&self) -> ElectricCharge {
