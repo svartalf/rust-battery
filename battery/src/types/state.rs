@@ -13,6 +13,7 @@ pub enum State {
     Discharging,
     Empty,
     Full,
+    Notcharging,
 
     // Awaiting for https://github.com/rust-lang/rust/issues/44109
     #[doc(hidden)]
@@ -33,6 +34,7 @@ impl str::FromStr for State {
             _ if s.eq_ignore_ascii_case("Full") => Ok(State::Full),
             _ if s.eq_ignore_ascii_case("Charging") => Ok(State::Charging),
             _ if s.eq_ignore_ascii_case("Discharging") => Ok(State::Discharging),
+            _ if s.eq_ignore_ascii_case("Not charging") => Ok(State::Notcharging),
             _ => Err(io::Error::from(io::ErrorKind::InvalidData)),
         }
     }
@@ -46,6 +48,7 @@ impl fmt::Display for State {
             State::Discharging => "discharging",
             State::Empty => "empty",
             State::Full => "full",
+            State::Notcharging => "Not charging",
             _ => "unknown",
         };
 
