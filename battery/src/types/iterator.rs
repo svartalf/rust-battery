@@ -1,5 +1,5 @@
-use std::fmt;
-
+#[cfg(feature = "export")]
+use crate::OwnedBattery;
 use crate::platform::Iterator as PlatformIterator;
 use crate::{Battery, Result};
 
@@ -12,14 +12,31 @@ use crate::{Battery, Result};
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 pub struct Batteries(PlatformIterator);
 
-impl Iterator for Batteries {
-    type Item = Result<Battery>;
+impl Batteries {
+    fn next_result(&mut self) -> Option<Result<Battery>> {
+        self.0.next().map(|result| result.map(Battery::from))
+    }
+}
 
+impl Iterator for Batteries {
+    #[cfg(not(feature = "co3"))]
+    type Item = Result<Battery>;
+    #[cfg(feature = "export")]
+    type Item = Option<OwnedBattery>;
+
+    #[cfg(not(feature = "co3"))]
     fn next(&mut self) -> Option<Self::Item> {
-        match self.0.next() {
-            Some(Ok(device)) => Some(Ok(device.into())),
-            Some(Err(e)) => Some(Err(e)),
-            None => None,
+        self.next_result()
+    }
+
+    #[cfg(feature = "export")]
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.next_result() {
+            Some(result) => Some(crate::errors::into_ffi_option(result.map(Box::new))),
+            None => {
+                crate::errors::clear_ffi_error();
+                None
+            }
         }
     }
 
@@ -34,8 +51,8 @@ impl From<PlatformIterator> for Batteries {
     }
 }
 
-impl fmt::Debug for Batteries {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl core::fmt::Debug for Batteries {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         f.debug_struct("Batteries").field("impl", &self.0).finish()
     }
 }

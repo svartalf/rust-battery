@@ -20,6 +20,7 @@ pub struct Error {
 }
 
 impl Error {
+    #[cfg(any(not(feature = "co3"), feature = "export"))]
     #[allow(unused)]
     pub(crate) fn new<T>(e: io::Error, description: T) -> Error
     where
@@ -31,6 +32,7 @@ impl Error {
         }
     }
 
+    #[cfg(any(not(feature = "co3"), feature = "export"))]
     #[allow(unused)]
     pub(crate) fn not_found<T>(description: T) -> Error
     where
@@ -42,6 +44,7 @@ impl Error {
         }
     }
 
+    #[cfg(any(not(feature = "co3"), feature = "export"))]
     #[allow(unused)]
     pub(crate) fn invalid_data<T>(description: T) -> Error
     where
@@ -78,7 +81,81 @@ impl From<io::Error> for Error {
     }
 }
 
+#[cfg(feature = "export")]
+use std::cell::RefCell;
+
+#[cfg(feature = "export")]
+thread_local! {
+    static LAST_FFI_ERROR: RefCell<Option<Box<dyn StdError>>> = RefCell::new(None);
+}
+
+#[cfg(feature = "export")]
+pub(crate) fn set_ffi_error<E: StdError + 'static>(error: E) {
+    LAST_FFI_ERROR.with(|previous| *previous.borrow_mut() = Some(Box::new(error)));
+}
+
+#[cfg(feature = "export")]
+pub(crate) fn clear_ffi_error() {
+    LAST_FFI_ERROR.with(|previous| *previous.borrow_mut() = None);
+}
+
+#[cfg(feature = "export")]
+pub(crate) fn into_ffi_option<T>(result: Result<T>) -> Option<T> {
+    match result {
+        Ok(value) => {
+            clear_ffi_error();
+            Some(value)
+        }
+        Err(error) => {
+            set_ffi_error(error);
+            None
+        }
+    }
+}
+
+#[cfg(feature = "export")]
+pub fn battery_have_last_error() -> core::ffi::c_int {
+    LAST_FFI_ERROR.with(|previous| i32::from(previous.borrow().is_some()))
+}
+
+#[cfg(feature = "export")]
+pub(crate) fn battery_last_error_length() -> core::ffi::c_int {
+    LAST_FFI_ERROR.with(|previous| match previous.borrow().as_ref() {
+        Some(error) => {
+            let length = error.to_string().len();
+            if length >= core::ffi::c_int::MAX as usize {
+                -1
+            } else {
+                (length + 1) as core::ffi::c_int
+            }
+        }
+        None => 0,
+    })
+}
+
+/// Copies the message and consumes it only after a successful write.
+#[cfg(feature = "export")]
+pub(crate) fn battery_last_error_message(buffer: &mut [u8]) -> core::ffi::c_int {
+    LAST_FFI_ERROR.with(|previous| {
+        let mut previous = previous.borrow_mut();
+        let error = match previous.as_ref() {
+            Some(error) => error,
+            None => return 0,
+        };
+        let message = error.to_string();
+        if message.len() >= buffer.len() || message.len() > core::ffi::c_int::MAX as usize {
+            return -1;
+        }
+
+        buffer[..message.len()].copy_from_slice(message.as_bytes());
+        buffer[message.len()] = 0;
+        *previous = None;
+        message.len() as core::ffi::c_int
+    })
+}
+
 #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 mod nix_impl {
     use std::io;
 

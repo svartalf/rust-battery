@@ -11,6 +11,13 @@ keywords = ["battery", "linux", "macos", "windows", "freebsd"]
 license = "Apache-2.0 OR MIT"
 build = "build.rs"
 
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[features]
+default = []
+export = ["co3", "cbindgen"]
+
 [badges]
 travis-ci = { repository = "svartalf/rust-battery", branch = "master" }
 maintenance = { status = "actively-developed" }
@@ -19,7 +26,8 @@ is-it-maintained-open-issues = { repository = "svartalf/rust-battery" }
 
 [dependencies]
 cfg-if = "1.0"
-num-traits = { version = "0.2", default_features = false }
+co3 = { version = "0.7.4", optional = true }
+num-traits = { version = "0.2", default-features = false }
 uom = { version = "0.30", features = ["autoconvert", "f32", "si"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
@@ -40,3 +48,7 @@ nix = "~0.19"
 [dev-dependencies]
 tempfile = "^3.0"
 approx = "0.3.2"
+
+[build-dependencies]
+# FIXME: cbindgen doesn't yet support expanded form of the co3::ffi! macro, therefore a custom fork is required to get the feature
+cbindgen = { git = "https://github.com/mversic/cbindgen.git", branch = "blanket-impls", default-features = false, optional = true }

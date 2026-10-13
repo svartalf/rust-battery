@@ -1,3 +1,5 @@
+#[cfg(feature = "export")]
+use std::ffi::{CString, c_float};
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
@@ -21,6 +23,79 @@ where
     Device: BatteryDevice;
 
 impl Battery {
+    /// Battery current state.
+    ///
+    /// See [State](enum.State.html) enum for possible values.
+    pub fn state(&self) -> State {
+        self.0.state()
+    }
+
+    /// Battery technology.
+    ///
+    /// See [Technology](enum.Technology.html) enum for possible values.
+    pub fn technology(&self) -> Technology {
+        self.0.technology()
+    }
+
+    fn state_of_charge_value(&self) -> Ratio {
+        self.0.state_of_charge()
+    }
+
+    fn energy_value(&self) -> Energy {
+        self.0.energy()
+    }
+
+    fn energy_full_value(&self) -> Energy {
+        self.0.energy_full()
+    }
+
+    fn energy_full_design_value(&self) -> Energy {
+        self.0.energy_full_design()
+    }
+
+    fn energy_rate_value(&self) -> Power {
+        self.0.energy_rate()
+    }
+
+    fn voltage_value(&self) -> ElectricPotential {
+        self.0.voltage()
+    }
+
+    fn state_of_health_value(&self) -> Ratio {
+        self.0.state_of_health()
+    }
+
+    fn temperature_value(&self) -> Option<ThermodynamicTemperature> {
+        self.0.temperature()
+    }
+
+    fn cycle_count_value(&self) -> Option<u32> {
+        self.0.cycle_count()
+    }
+
+    fn vendor_value(&self) -> Option<&str> {
+        self.0.vendor()
+    }
+
+    fn model_value(&self) -> Option<&str> {
+        self.0.model()
+    }
+
+    fn serial_number_value(&self) -> Option<&str> {
+        self.0.serial_number()
+    }
+
+    fn time_to_full_value(&self) -> Option<Time> {
+        self.0.time_to_full()
+    }
+
+    fn time_to_empty_value(&self) -> Option<Time> {
+        self.0.time_to_empty()
+    }
+}
+
+#[cfg(not(feature = "export"))]
+impl Battery {
     /// Battery state of charge.
     ///
     /// The *State of Charge* (or *SOC*) is an expression of the battery capacity
@@ -39,32 +114,32 @@ impl Battery {
     ///  * [https://en.wikipedia.org/wiki/State_of_charge](https://en.wikipedia.org/wiki/State_of_charge)
     ///  * [https://www.mpoweruk.com/soc.htm](https://www.mpoweruk.com/soc.htm)
     pub fn state_of_charge(&self) -> Ratio {
-        self.0.state_of_charge()
+        self.state_of_charge_value()
     }
 
     /// Amount of energy currently available in the battery.
     pub fn energy(&self) -> Energy {
-        self.0.energy()
+        self.energy_value()
     }
 
     /// Amount of energy in the battery when it's considered full.
     pub fn energy_full(&self) -> Energy {
-        self.0.energy_full()
+        self.energy_full_value()
     }
 
     /// Amount of energy the battery is designed to hold when it's considered full.
     pub fn energy_full_design(&self) -> Energy {
-        self.0.energy_full_design()
+        self.energy_full_design_value()
     }
 
     /// Amount of energy being drained from the battery.
     pub fn energy_rate(&self) -> Power {
-        self.0.energy_rate()
+        self.energy_rate_value()
     }
 
     /// Battery voltage.
     pub fn voltage(&self) -> ElectricPotential {
-        self.0.voltage()
+        self.voltage_value()
     }
 
     /// Gets battery state of health.
@@ -80,46 +155,32 @@ impl Battery {
     ///  * [https://en.wikipedia.org/wiki/State_of_health](https://en.wikipedia.org/wiki/State_of_health)
     ///  * [https://www.mpoweruk.com/soh.htm](https://www.mpoweruk.com/soh.htm)
     pub fn state_of_health(&self) -> Ratio {
-        self.0.state_of_health()
-    }
-
-    /// Battery current state.
-    ///
-    /// See [State](enum.State.html) enum for possible values.
-    pub fn state(&self) -> State {
-        self.0.state()
-    }
-
-    /// Battery technology.
-    ///
-    /// See [Technology](enum.Technology.html) enum for possible values.
-    pub fn technology(&self) -> Technology {
-        self.0.technology()
+        self.state_of_health_value()
     }
 
     /// Battery temperature.
     pub fn temperature(&self) -> Option<ThermodynamicTemperature> {
-        self.0.temperature()
+        self.temperature_value()
     }
 
     /// Number of charge/discharge cycles.
     pub fn cycle_count(&self) -> Option<u32> {
-        self.0.cycle_count()
+        self.cycle_count_value()
     }
 
     /// Battery vendor.
     pub fn vendor(&self) -> Option<&str> {
-        self.0.vendor()
+        self.vendor_value()
     }
 
     /// Battery model.
     pub fn model(&self) -> Option<&str> {
-        self.0.model()
+        self.model_value()
     }
 
     /// Battery serial number.
     pub fn serial_number(&self) -> Option<&str> {
-        self.0.serial_number()
+        self.serial_number_value()
     }
 
     /// Remaining time till full battery.
@@ -129,7 +190,7 @@ impl Battery {
     ///
     /// If battery is not charging at the moment, this method will return `None`.
     pub fn time_to_full(&self) -> Option<Time> {
-        self.0.time_to_full()
+        self.time_to_full_value()
     }
 
     /// Remaining time till empty battery.
@@ -139,7 +200,74 @@ impl Battery {
     ///
     /// If battery is not discharging at the moment, this method will return `None`.
     pub fn time_to_empty(&self) -> Option<Time> {
-        self.0.time_to_empty()
+        self.time_to_empty_value()
+    }
+}
+
+#[cfg(feature = "export")]
+impl Battery {
+    pub fn state_of_charge(&self) -> c_float {
+        self.state_of_charge_value()
+            .get::<crate::units::ratio::percent>()
+    }
+
+    pub fn energy(&self) -> c_float {
+        self.energy_value().get::<crate::units::energy::joule>()
+    }
+
+    pub fn energy_full(&self) -> c_float {
+        self.energy_full_value().get::<crate::units::energy::joule>()
+    }
+
+    pub fn energy_full_design(&self) -> c_float {
+        self.energy_full_design_value()
+            .get::<crate::units::energy::joule>()
+    }
+
+    pub fn energy_rate(&self) -> c_float {
+        self.energy_rate_value().get::<crate::units::power::watt>()
+    }
+
+    pub fn voltage(&self) -> c_float {
+        self.voltage_value()
+            .get::<crate::units::electric_potential::volt>()
+    }
+
+    pub fn state_of_health(&self) -> c_float {
+        self.state_of_health_value()
+            .get::<crate::units::ratio::percent>()
+    }
+
+    pub fn time_to_full(&self) -> c_float {
+        self.time_to_full_value()
+            .map_or(f32::NAN, |value| value.get::<crate::units::time::second>())
+    }
+
+    pub fn time_to_empty(&self) -> c_float {
+        self.time_to_empty_value()
+            .map_or(f32::NAN, |value| value.get::<crate::units::time::second>())
+    }
+
+    pub fn temperature(&self) -> c_float {
+        self.temperature_value().map_or(f32::NAN, |value| {
+            value.get::<crate::units::thermodynamic_temperature::kelvin>()
+        })
+    }
+
+    pub fn cycle_count(&self) -> u32 {
+        self.cycle_count_value().unwrap_or(u32::MAX)
+    }
+
+    pub fn vendor(&self) -> Option<CString> {
+        self.vendor_value().and_then(|value| CString::new(value).ok())
+    }
+
+    pub fn model(&self) -> Option<CString> {
+        self.model_value().and_then(|value| CString::new(value).ok())
+    }
+
+    pub fn serial_number(&self) -> Option<CString> {
+        self.serial_number_value().and_then(|value| CString::new(value).ok())
     }
 }
 

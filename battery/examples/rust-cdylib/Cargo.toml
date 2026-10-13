@@ -1,0 +1,10 @@
+[package]
+name = "battery-rust-cdylib-example"
+version = "0.1.0"
+edition = "2018"
+build = "build.rs"
+
+[workspace]
+
+[dependencies]
+battery = { path = "../..", default-features = false, features = ["co3"] }

@@ -2,11 +2,16 @@ use std::fmt;
 use std::io;
 use std::str;
 
+#[cfg(feature = "co3")]
+use co3::{rust_spec::RustSpec, ReprC};
+
 /// Possible battery state values.
 ///
 /// Unknown can mean either controller returned unknown,
 /// or not able to retrieve state due to some error.
+#[cfg_attr(feature = "co3", derive(RustSpec, ReprC))]
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
+#[repr(u8)]
 pub enum State {
     Unknown,
     Charging,
@@ -16,7 +21,7 @@ pub enum State {
 
     // Awaiting for https://github.com/rust-lang/rust/issues/44109
     #[doc(hidden)]
-    __Nonexhaustive,
+    __Nonexhaustive = 255,
 }
 
 impl str::FromStr for State {

@@ -87,7 +87,7 @@ jobs:
 
   macos:
     name: macOS
-    runs-on: macOS-latest
+    runs-on: macos-15-intel
     strategy:
       matrix:
         toolchain:

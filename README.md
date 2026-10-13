@@ -80,11 +80,13 @@ for additional examples.
 
 ## FFI bindings
 
-Experimental [battery-ffi](https://crates.io/crates/battery-ffi) crate provides the FFI bindings to the `battery` crate,
-so it can be used with other languages, such as C, Python or NodeJS.
+The crate has three modes:
 
-Check its [README](https://github.com/svartalf/rust-battery/tree/master/battery-ffi)
-and [documentation](https://docs.rs/battery-ffi) for details.
+- Use `battery` as a normal Cargo dependency for its Rust API.
+- Enable the `export` feature to build the C shared (`cdylib`) library.
+- Enable the `co3` feature to link a shared (`cdylib`) library built with `export`.
+
+  See the [Rust example](battery/examples/rust-cdylib/).
 
 ## Users
 

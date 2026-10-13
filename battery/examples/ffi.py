@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-This is an example of FFI bindings for `battery-ffi` library.
+This is an example of the battery C library.
 
 Call it similar to this:
 
@@ -9,7 +9,7 @@ Call it similar to this:
 $ LD_LIBRARY_PATH=../../target/debug/ ./ffi.py
 ```
 
-`battery-ffi` crate should be built before that.
+Build the `battery` crate with the `export` feature before running this.
 """
 
 import sys
@@ -18,7 +18,7 @@ import logging
 
 prefix = {'win32': ''}.get(sys.platform, 'lib')
 extension = {'darwin': 'dylib', 'win32': 'dll'}.get(sys.platform, 'so')
-lib = ctypes.cdll.LoadLibrary('{}battery_ffi.{}'.format(prefix, extension))
+lib = ctypes.cdll.LoadLibrary('{}battery.{}'.format(prefix, extension))
 
 STATE = {
     0: 'unknown',
@@ -57,6 +57,23 @@ class Battery(ctypes.Structure):
     pass
 
 
+BatteryString = ctypes.c_void_p
+
+
+class CSliceMutu8(ctypes.Structure):
+    _fields_ = [('data', ctypes.POINTER(ctypes.c_uint8)), ('len', ctypes.c_size_t)]
+
+
+def read_string(getter, battery):
+    value = getter(battery)
+    if not value:
+        return None
+    try:
+        return ctypes.string_at(value).decode('utf-8')
+    finally:
+        lib.battery_str_free(value)
+
+
 def check_result(result, _func, _args):
     # Checking if passed value is not `NULL` pointer.
     if lib.battery_have_last_error() == 0:
@@ -64,10 +81,15 @@ def check_result(result, _func, _args):
 
     # If it is, constructing error message and raising it
     length = lib.battery_last_error_length()
-    message = ctypes.create_string_buffer(length)
-    lib.battery_last_error_message(ctypes.byref(message), len(message))
+    text = 'Unknown battery error'
+    if length > 0:
+        message = ctypes.create_string_buffer(length)
+        buffer = CSliceMutu8(ctypes.cast(message, ctypes.POINTER(ctypes.c_uint8)), length)
+        written = lib.battery_last_error_message(buffer)
+        if written > 0:
+            text = message.raw[:written].decode('utf-8')
 
-    raise ValueError(message.value)
+    raise ValueError(text)
 
 
 #
@@ -89,15 +111,15 @@ lib.battery_iterator_next.errcheck = check_result
 
 lib.battery_free.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_free.restype = None
-lib.battery_str_free.argtypes = (ctypes.c_char_p, )
+lib.battery_str_free.argtypes = (BatteryString, )
 lib.battery_str_free.restype = None
-
 lib.battery_get_vendor.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_vendor.restype = ctypes.c_char_p
+lib.battery_get_vendor.restype = BatteryString
 lib.battery_get_model.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_model.restype = ctypes.c_char_p
+lib.battery_get_model.restype = BatteryString
 lib.battery_get_serial_number.argtypes = (ctypes.POINTER(Battery), )
-lib.battery_get_serial_number.restype = ctypes.c_char_p
+lib.battery_get_serial_number.restype = BatteryString
+lib.battery_get_state.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_state.restype = ctypes.c_uint8
 lib.battery_get_energy.argtypes = (ctypes.POINTER(Battery), )
 lib.battery_get_energy.restype = ctypes.c_float
@@ -127,9 +149,9 @@ lib.battery_get_cycle_count.restype = ctypes.c_uint32
 lib.battery_have_last_error.argtypes = None
 lib.battery_have_last_error.restype = ctypes.c_int
 lib.battery_last_error_length.argtypes = None
-lib.battery_last_error_length.restype = ctypes.c_int
-lib.battery_last_error_message.argtypes = (ctypes.c_char_p, ctypes.c_int)
-lib.battery_last_error_message.restype = ctypes.c_int
+lib.battery_last_error_length.restype = ctypes.c_int32
+lib.battery_last_error_message.argtypes = (CSliceMutu8,)
+lib.battery_last_error_message.restype = ctypes.c_int32
 
 
 if __name__ == '__main__':
@@ -140,9 +162,9 @@ if __name__ == '__main__':
         if not battery:
             break
 
-        print('Vendor', lib.battery_get_vendor(battery))
-        print('Model', lib.battery_get_model(battery))
-        print('S/N', lib.battery_get_serial_number(battery))
+        print('Vendor', read_string(lib.battery_get_vendor, battery))
+        print('Model', read_string(lib.battery_get_model, battery))
+        print('S/N', read_string(lib.battery_get_serial_number, battery))
         print('State', STATE.get(lib.battery_get_state(battery)))
         print('Technology', TECHNOLOGY.get(lib.battery_get_technology(battery)))
         print('Energy (joule)', lib.battery_get_energy(battery))
@@ -159,5 +181,5 @@ if __name__ == '__main__':
 
         lib.battery_free(battery)
 
-    lib.battery_iterator_free(battery)
+    lib.battery_iterator_free(iterator)
     lib.battery_manager_free(manager)

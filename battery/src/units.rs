@@ -77,6 +77,7 @@ pub use uom::si::{
     electric_charge, electric_current, electric_potential, energy, power, ratio, thermodynamic_temperature, time,
 };
 
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 use num_traits::ToPrimitive;
 
 // Macros and traits for a quicker conversion into uom types.
@@ -84,6 +85,7 @@ use num_traits::ToPrimitive;
 // in the most editors, and since there are a lot of different measurement units used,
 // I think it is a nice idea to highlight conversions, just to be sure proper units are used.
 
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 pub(crate) trait IntoQuantity<T>
 where
     T: ToPrimitive,
@@ -93,6 +95,7 @@ where
     fn from_primitive(value: T) -> Self::Quantity;
 }
 
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 macro_rules! impl_into_quantity {
     ($unit:path, $quantity:ty) => {
         impl<T> IntoQuantity<T> for $unit
@@ -111,22 +114,39 @@ macro_rules! impl_into_quantity {
     };
 }
 
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(electric_charge::milliampere_hour, ElectricCharge);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(electric_charge::microampere_hour, ElectricCharge);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(energy::milliwatt_hour, Energy);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(energy::microwatt_hour, Energy);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(electric_current::milliampere, ElectricCurrent);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(electric_current::microampere, ElectricCurrent);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(power::watt, Power);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(power::milliwatt, Power);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(power::microwatt, Power);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(electric_potential::volt, ElectricPotential);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(electric_potential::millivolt, ElectricPotential);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(electric_potential::microvolt, ElectricPotential);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(thermodynamic_temperature::degree_celsius, ThermodynamicTemperature);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(thermodynamic_temperature::decikelvin, ThermodynamicTemperature);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(ratio::percent, Ratio);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(time::second, Time);
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl_into_quantity!(time::minute, Time);
 
 /// Create `ElectricCharge` quantity with `milliampere_hour` unit
@@ -256,10 +276,12 @@ macro_rules! unit {
 /// For values in `0…1` ratio (or `0…100` %).
 ///
 /// Method `bound` caps value into this range.
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 pub(crate) trait Bound: Sized {
     fn into_bounded(self) -> Self;
 }
 
+#[cfg(any(not(feature = "co3"), feature = "export"))]
 impl Bound for Ratio {
     #[inline]
     fn into_bounded(mut self) -> Self {
